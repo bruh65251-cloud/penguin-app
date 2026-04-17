@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Penguin.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #151515;
+            --bg-hover: #1f1f1f;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1a1;
+            --text-muted: #6b6b6b;
+            --border-color: #262626;
+            --accent-blue: #2563eb;
+            --accent-blue-hover: #1d4ed8;
+            --accent-coral: #e85a4f;
+            --accent-green: #22c55e;
+            --accent-yellow: #eab308;
+            --accent-purple: #8b5cf6;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo-dot {
+            color: var(--accent-coral);
+        }
+
+        .sidebar-nav {
+            padding: 16px 12px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0 12px;
+            margin-bottom: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background-color: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .nav-item-badge {
+            margin-left: auto;
+            background-color: var(--accent-blue);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .user-profile:hover {
+            background-color: var(--bg-hover);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .user-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-green);
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .top-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 32px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-secondary);
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 16px;
+            width: 400px;
+        }
+
+        .search-bar input {
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-bar svg {
+            width: 18px;
+            height: 18px;
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .icon-btn:hover {
+            background-color: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .icon-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 18px;
+            height: 18px;
+            background-color: var(--accent-coral);
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .settings-page {
+            padding: 32px;
+            flex: 1;
+            max-width: 1100px;
+        }
+
+        .page-hero {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .page-title {
+            font-size: 30px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+            max-width: 720px;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-blue-hover);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.06);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .settings-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 18px;
+            padding: 22px;
+        }
+
+        .settings-card.full {
+            grid-column: 1 / -1;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .card-subtitle {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.55;
+            margin-bottom: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            color: rgba(255,255,255,0.72);
+            margin-bottom: 8px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 13px 14px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            font-family: inherit;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            border-color: rgba(37,99,235,0.45);
+            background: rgba(0,0,0,0.32);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 96px;
+        }
+
+        .toggle-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .toggle-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .toggle-info {
+            min-width: 0;
+        }
+
+        .toggle-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .toggle-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .switch {
+            position: relative;
+            width: 52px;
+            height: 30px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            display: none;
+        }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.12);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: 0.25s ease;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .slider::before {
+            content: "";
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            left: 3px;
+            top: 3px;
+            border-radius: 50%;
+            background: white;
+            transition: 0.25s ease;
+        }
+
+        .switch input:checked + .slider {
+            background: rgba(37,99,235,0.6);
+            border-color: rgba(37,99,235,0.5);
+        }
+
+        .switch input:checked + .slider::before {
+            transform: translateX(22px);
+        }
+
+        .color-palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .color-option {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: 0.2s ease;
+            position: relative;
+        }
+
+        .color-option.active {
+            border-color: white;
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
+        }
+
+        .color-blue { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+        .color-purple { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+        .color-coral { background: linear-gradient(135deg, #e85a4f, #fb7185); }
+        .color-green { background: linear-gradient(135deg, #16a34a, #22c55e); }
+        .color-yellow { background: linear-gradient(135deg, #d97706, #f59e0b); }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .chip {
+            padding: 9px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.72);
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .chip.active {
+            background: rgba(37,99,235,0.18);
+            border-color: rgba(37,99,235,0.3);
+            color: #bfdbfe;
+        }
+
+        .save-status {
+            margin-top: 18px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: rgba(34,197,94,0.12);
+            border: 1px solid rgba(34,197,94,0.2);
+            color: #86efac;
+            font-size: 13px;
+            display: none;
+        }
+
+        .save-status.show {
+            display: block;
+        }
+
+        @media (max-width: 900px) {
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 860px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .top-header {
+                padding: 16px 20px;
+                gap: 12px;
+            }
+
+            .search-bar {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .settings-page {
+                padding: 20px;
+            }
+
+            .page-hero {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .action-group {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="dashboard.html" class="logo">
+                Penguin<span class="logo-dot">.</span>
+            </a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="dashboard.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V9.5z"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="team-chat.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Team Chat
+                    <span class="nav-item-badge">4</span>
+                </a>
+                <a href="schedule.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    Schedule
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Workspace</div>
+                <a href="teams.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    Teams
+                </a>
+                <a href="friends.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="8.5" cy="7" r="4"/>
+                        <path d="M20 8v6"/>
+                        <path d="M23 11h-6"/>
+                    </svg>
+                    Friends
+                </a>
+                <a href="settings.html" class="nav-item active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0A1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0A1.65 1.65 0 0 0 20.91 10H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    Settings
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">PE</div>
+                <div class="user-info">
+                    <div class="user-name">Percy</div>
+                    <div class="user-status">
+                        <span class="status-dot"></span>
+                        Online
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="search-bar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="globalSearch" placeholder="Search settings, preferences, privacy...">
+            </div>
+
+            <div class="header-actions">
+                <button class="icon-btn" type="button" aria-label="Notifications">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span class="notification-badge">1</span>
+                </button>
+            </div>
+        </header>
+
+        <section class="settings-page">
+            <div class="page-hero">
+                <div>
+                    <div class="page-title">Settings</div>
+                    <div class="page-subtitle">
+                        Adjust your profile, notifications, appearance, language, and privacy settings for the Penguin workspace.
+                    </div>
+                </div>
+
+                <div class="action-group">
+                    <button class="btn-secondary" id="resetBtn">Reset</button>
+                    <button class="btn-primary" id="saveBtn">Save Changes</button>
+                </div>
+            </div>
+
+            <div class="settings-grid">
+                <div class="settings-card">
+                    <div class="card-title">Profile</div>
+                    <div class="card-subtitle">Update your basic account identity and how others see you in the workspace.</div>
+
+                    <div class="form-group">
+                        <label class="form-label">Display Name</label>
+                        <input type="text" class="form-input" id="displayName" value="Percy">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="email" value="percy@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">About</label>
+                        <textarea class="form-textarea" id="aboutText">Working on the Penguin communication tool prototype and polishing the final presentation flow.</textarea>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-title">Workspace Preferences</div>
+                    <div class="card-subtitle">Choose language, default meeting behavior, and your preferred accent color.</div>
+
+                    <div class="form-group">
+                        <label class="form-label">Language</label>
+                        <select class="form-select" id="languageSelect">
+                            <option value="english" selected>English</option>
+                            <option value="thai">Thai</option>
+                            <option value="chinese">Chinese</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Meeting Join Preference</label>
+                        <select class="form-select" id="joinPref">
+                            <option value="preview" selected>Always show preview first</option>
+                            <option value="camera-on">Join with camera on</option>
+                            <option value="camera-off">Join with camera off</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Accent Color</label>
+                        <div class="color-palette" id="colorPalette">
+                            <button class="color-option color-blue active" data-color="blue" type="button"></button>
+                            <button class="color-option color-purple" data-color="purple" type="button"></button>
+                            <button class="color-option color-coral" data-color="coral" type="button"></button>
+                            <button class="color-option color-green" data-color="green" type="button"></button>
+                            <button class="color-option color-yellow" data-color="yellow" type="button"></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-title">Notifications</div>
+                    <div class="card-subtitle">Control what kinds of alerts you receive in the app.</div>
+
+                    <div class="toggle-list">
+                        <div class="toggle-row">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Message Notifications</div>
+                                <div class="toggle-desc">Receive alerts for new team chat and direct messages.</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="msgNotif" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="toggle-row">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Meeting Reminders</div>
+                                <div class="toggle-desc">Get reminders before scheduled meetings begin.</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="meetingNotif" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="toggle-row">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Friend Requests</div>
+                                <div class="toggle-desc">Be notified when new contact requests arrive.</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="friendNotif">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-title">Privacy</div>
+                    <div class="card-subtitle">Control who can reach you and what status details are visible.</div>
+
+                    <div class="form-group">
+                        <label class="form-label">Profile Visibility</label>
+                        <div class="chip-row" id="visibilityChips">
+                            <button class="chip active" type="button" data-value="everyone">Everyone</button>
+                            <button class="chip" type="button" data-value="friends">Friends Only</button>
+                            <button class="chip" type="button" data-value="private">Private</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Status Visibility</label>
+                        <div class="chip-row" id="statusChips">
+                            <button class="chip active" type="button" data-value="online">Show Online Status</button>
+                            <button class="chip" type="button" data-value="busy">Show Busy Only</button>
+                            <button class="chip" type="button" data-value="hidden">Hide Status</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-card full">
+                    <div class="card-title">Accessibility & Call Tools</div>
+                    <div class="card-subtitle">Choose how assistive features should behave during meetings.</div>
+
+                    <div class="toggle-list">
+                        <div class="toggle-row">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Enable Translation Tools</div>
+                                <div class="toggle-desc">Allow translation assistance inside the live call room.</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="translationToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="toggle-row">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Enable Gesture Recognition</div>
+                                <div class="toggle-desc">Allow gesture-based subtitle support during the call.</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="gestureToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="toggle-row">
+                            <div class="toggle-info">
+                                <div class="toggle-title">Auto Show Meeting Preview</div>
+                                <div class="toggle-desc">Always show the setup screen before creating or joining a meeting.</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="previewToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="save-status" id="saveStatus">Settings saved successfully.</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const defaults = {
+            displayName: 'Percy',
+            email: 'percy@example.com',
+            aboutText: 'Working on the Penguin communication tool prototype and polishing the final presentation flow.',
+            languageSelect: 'english',
+            joinPref: 'preview',
+            accentColor: 'blue',
+            visibility: 'everyone',
+            status: 'online',
+            msgNotif: true,
+            meetingNotif: true,
+            friendNotif: false,
+            translationToggle: true,
+            gestureToggle: true,
+            previewToggle: true
+        };
+
+        let state = { ...defaults };
+
+        function setChipGroup(groupId, value) {
+            document.querySelectorAll(`#${groupId} .chip`).forEach(chip => {
+                chip.classList.toggle('active', chip.dataset.value === value);
+            });
+        }
+
+        function setColor(color) {
+            state.accentColor = color;
+            document.querySelectorAll('.color-option').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.color === color);
+            });
+        }
+
+        function populateForm() {
+            document.getElementById('displayName').value = state.displayName;
+            document.getElementById('email').value = state.email;
+            document.getElementById('aboutText').value = state.aboutText;
+            document.getElementById('languageSelect').value = state.languageSelect;
+            document.getElementById('joinPref').value = state.joinPref;
+
+            document.getElementById('msgNotif').checked = state.msgNotif;
+            document.getElementById('meetingNotif').checked = state.meetingNotif;
+            document.getElementById('friendNotif').checked = state.friendNotif;
+            document.getElementById('translationToggle').checked = state.translationToggle;
+            document.getElementById('gestureToggle').checked = state.gestureToggle;
+            document.getElementById('previewToggle').checked = state.previewToggle;
+
+            setColor(state.accentColor);
+            setChipGroup('visibilityChips', state.visibility);
+            setChipGroup('statusChips', state.status);
+        }
+
+        function readForm() {
+            state.displayName = document.getElementById('displayName').value.trim();
+            state.email = document.getElementById('email').value.trim();
+            state.aboutText = document.getElementById('aboutText').value.trim();
+            state.languageSelect = document.getElementById('languageSelect').value;
+            state.joinPref = document.getElementById('joinPref').value;
+
+            state.msgNotif = document.getElementById('msgNotif').checked;
+            state.meetingNotif = document.getElementById('meetingNotif').checked;
+            state.friendNotif = document.getElementById('friendNotif').checked;
+            state.translationToggle = document.getElementById('translationToggle').checked;
+            state.gestureToggle = document.getElementById('gestureToggle').checked;
+            state.previewToggle = document.getElementById('previewToggle').checked;
+        }
+
+        function showSaveStatus(message = 'Settings saved successfully.') {
+            const saveStatus = document.getElementById('saveStatus');
+            saveStatus.textContent = message;
+            saveStatus.classList.add('show');
+
+            clearTimeout(showSaveStatus._timer);
+            showSaveStatus._timer = setTimeout(() => {
+                saveStatus.classList.remove('show');
+            }, 2200);
+        }
+
+        document.querySelectorAll('#visibilityChips .chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                state.visibility = chip.dataset.value;
+                setChipGroup('visibilityChips', state.visibility);
+            });
+        });
+
+        document.querySelectorAll('#statusChips .chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                state.status = chip.dataset.value;
+                setChipGroup('statusChips', state.status);
+            });
+        });
+
+        document.querySelectorAll('.color-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setColor(btn.dataset.color);
+            });
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            readForm();
+            showSaveStatus();
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            state = { ...defaults };
+            populateForm();
+            showSaveStatus('Settings reset to default values.');
+        });
+
+        populateForm();
+    </script>
+</body>
+</html>

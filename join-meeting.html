@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Meeting - Penguin.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #151515;
+            --bg-hover: #1f1f1f;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1a1;
+            --text-muted: #6b6b6b;
+            --border-color: #262626;
+            --accent-blue: #2563eb;
+            --accent-blue-hover: #1d4ed8;
+            --accent-coral: #e85a4f;
+            --accent-green: #22c55e;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #e85a4f;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .back-btn:hover {
+            color: #ffffff;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-time {
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .main-container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+            gap: 40px;
+            min-height: calc(100vh - 81px);
+        }
+
+        .camera-section {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            color: rgba(255, 255, 255, 0.62);
+            font-size: 14px;
+            line-height: 1.6;
+            max-width: 680px;
+        }
+
+        .camera-preview {
+            background: #0d1520;
+            border-radius: 16px;
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .camera-preview.camera-on {
+            background: linear-gradient(135deg, #1a2744 0%, #0d1520 100%);
+        }
+
+        .camera-off-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .camera-off-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 600;
+        }
+
+        .camera-off-text {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            line-height: 1.5;
+            max-width: 320px;
+        }
+
+        .camera-on-state {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .camera-on-state video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-name-tag {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            z-index: 2;
+        }
+
+        .mic-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+        }
+
+        .mic-indicator.muted {
+            background: #ef4444;
+        }
+
+        .camera-controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 100px;
+            color: #fff;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .control-btn.active {
+            background: rgba(37, 99, 235, 0.2);
+            border-color: #2563eb;
+        }
+
+        .control-btn.muted {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+        }
+
+        .control-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .control-btn span {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .join-section {
+            flex: 0.8;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .join-card,
+        .name-card,
+        .tips-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 28px;
+        }
+
+        .join-card-title,
+        .name-card-title,
+        .tips-card-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 22px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.72);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 14px 16px;
+            color: #ffffff;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon .form-input {
+            padding-right: 48px;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.45);
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .input-icon:hover {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .divider-text {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .recent-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .recent-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .recent-item:hover {
+            background: rgba(0, 0, 0, 0.32);
+        }
+
+        .recent-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(37, 99, 235, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #60a5fa;
+            flex-shrink: 0;
+        }
+
+        .recent-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .recent-info {
+            flex: 1;
+        }
+
+        .recent-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .recent-id {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        .recent-time {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.45);
+            white-space: nowrap;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: 'Inter', sans-serif;
+            border: none;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.22);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .tips-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tip-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.66);
+            line-height: 1.55;
+        }
+
+        .tip-item svg {
+            width: 16px;
+            height: 16px;
+            color: #22c55e;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column;
+                padding: 24px;
+            }
+
+            .camera-section,
+            .join-section {
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header {
+                padding: 16px 20px;
+            }
+
+            .header-left {
+                gap: 20px;
+            }
+
+            .header-time,
+            .user-name {
+                display: none;
+            }
+
+            .camera-controls {
+                flex-wrap: wrap;
+            }
+
+            .control-btn {
+                min-width: 80px;
+                padding: 12px 16px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="dashboard.html" class="logo">Penguin<span>.</span></a>
+            <a href="dashboard.html" class="back-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5"></path>
+                    <path d="M12 19l-7-7 7-7"></path>
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+        <div class="header-right">
+            <div class="header-time" id="headerTime">--:--</div>
+            <div class="user-profile">
+                <div class="user-avatar">PE</div>
+                <span class="user-name">Percy</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <section class="camera-section">
+            <div>
+                <h1 class="section-title">Join a Meeting</h1>
+                <p class="section-subtitle">
+                    Enter the meeting ID and password first, preview your camera and microphone, and then continue into the live call room.
+                </p>
+            </div>
+
+            <div class="camera-preview" id="cameraPreviewBox">
+                <div class="camera-off-state" id="cameraOffState">
+                    <div class="camera-off-avatar" id="cameraAvatar">PE</div>
+                    <p class="camera-off-text">
+                        Camera preview is off. Turn on your camera to check your framing before joining the meeting.
+                    </p>
+                </div>
+
+                <div class="camera-on-state" id="cameraOnState">
+                    <video id="videoPreview" autoplay muted playsinline></video>
+                </div>
+
+                <div class="camera-name-tag">
+                    <div class="mic-indicator" id="micIndicator"></div>
+                    <span id="displayNameTag">Guest (You)</span>
+                </div>
+            </div>
+
+            <div class="camera-controls">
+                <button class="control-btn active" id="micBtn" onclick="toggleMic()">
+                    <svg id="micIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                    <span>Mic</span>
+                </button>
+
+                <button class="control-btn" id="cameraBtn" onclick="toggleCamera()">
+                    <svg id="cameraIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 7l-7 5 7 5V7z"></path>
+                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                    </svg>
+                    <span>Camera</span>
+                </button>
+
+                <button class="control-btn active" id="speakerBtn" onclick="toggleSpeaker()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                    <span>Speaker</span>
+                </button>
+
+                <button class="control-btn" id="blurBtn" onclick="toggleBlur()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line>
+                        <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line>
+                        <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line>
+                        <line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line>
+                    </svg>
+                    <span>Blur</span>
+                </button>
+            </div>
+
+            <div class="tips-card">
+                <div class="tips-card-title">Before joining</div>
+                <div class="tips-list">
+                    <div class="tip-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Enter the meeting ID and password exactly as shared by the host.</span>
+                    </div>
+                    <div class="tip-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Check your camera and microphone before you continue into the call room.</span>
+                    </div>
+                    <div class="tip-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>AI translation and gesture tools will appear only after you enter the actual call page.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <aside class="join-section">
+            <div class="join-card">
+                <h2 class="join-card-title">Meeting Details</h2>
+
+                <div class="form-group">
+                    <label class="form-label">Meeting ID</label>
+                    <div class="input-with-icon">
+                        <input type="text" class="form-input" id="meetingId" placeholder="Enter meeting ID">
+                        <button class="input-icon" type="button" onclick="pasteFromClipboard()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="input-with-icon">
+                        <input type="password" class="form-input" id="meetingPassword" placeholder="Enter meeting password">
+                        <button class="input-icon" type="button" onclick="togglePasswordVisibility()">
+                            <svg id="passwordIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="divider">
+                    <div class="divider-line"></div>
+                    <span class="divider-text">OR SELECT RECENT</span>
+                    <div class="divider-line"></div>
+                </div>
+
+                <div class="recent-list">
+                    <div class="recent-item" onclick="selectRecentMeeting('856-432-9087', 'ABCD')">
+                        <div class="recent-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <div class="recent-info">
+                            <div class="recent-name">Team Weekly Standup</div>
+                            <div class="recent-id">ID: 856-432-9087 • Password: ABCD</div>
+                        </div>
+                        <span class="recent-time">Yesterday</span>
+                    </div>
+
+                    <div class="recent-item" onclick="selectRecentMeeting('742-918-3654', 'QWER')">
+                        <div class="recent-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                <polyline points="2 17 12 22 22 17"></polyline>
+                                <polyline points="2 12 12 17 22 12"></polyline>
+                            </svg>
+                        </div>
+                        <div class="recent-info">
+                            <div class="recent-name">Design Review</div>
+                            <div class="recent-id">ID: 742-918-3654 • Password: QWER</div>
+                        </div>
+                        <span class="recent-time">2 days ago</span>
+                    </div>
+
+                    <div class="recent-item" onclick="selectRecentMeeting('391-567-2048', 'ZXCV')">
+                        <div class="recent-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                <line x1="8" y1="21" x2="16" y2="21"></line>
+                                <line x1="12" y1="17" x2="12" y2="21"></line>
+                            </svg>
+                        </div>
+                        <div class="recent-info">
+                            <div class="recent-name">Client Presentation</div>
+                            <div class="recent-id">ID: 391-567-2048 • Password: ZXCV</div>
+                        </div>
+                        <span class="recent-time">Last week</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="name-card">
+                <h3 class="name-card-title">Your Display Name</h3>
+                <div class="form-group">
+                    <label class="form-label">Display Name</label>
+                    <input type="text" class="form-input" id="displayName" value="Bala Mia" placeholder="Enter your name">
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-secondary" type="button" onclick="window.location.href='dashboard.html'">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" type="button" onclick="joinMeeting()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                    </svg>
+                    Join Meeting
+                </button>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        let micEnabled = true;
+        let cameraEnabled = false;
+        let speakerEnabled = true;
+        let blurEnabled = false;
+        let stream = null;
+
+        function updateHeaderTime() {
+            const now = new Date();
+            const formatted = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('headerTime').textContent = formatted;
+        }
+
+        function updateDisplayTag() {
+            const displayName = document.getElementById('displayName').value.trim() || 'Guest';
+            const initials = displayName
+                .split(' ')
+                .map(part => part[0])
+                .join('')
+                .slice(0, 2)
+                .toUpperCase();
+
+            document.getElementById('displayNameTag').textContent = `${displayName} (You)`;
+            document.getElementById('cameraAvatar').textContent = initials || 'GU';
+        }
+
+        function toggleMic() {
+            micEnabled = !micEnabled;
+            const btn = document.getElementById('micBtn');
+            const indicator = document.getElementById('micIndicator');
+
+            if (micEnabled) {
+                btn.classList.remove('muted');
+                btn.classList.add('active');
+                indicator.classList.remove('muted');
+            } else {
+                btn.classList.remove('active');
+                btn.classList.add('muted');
+                indicator.classList.add('muted');
+            }
+
+            if (stream) {
+                stream.getAudioTracks().forEach(track => {
+                    track.enabled = micEnabled;
+                });
+            }
+        }
+
+        async function toggleCamera() {
+            const btn = document.getElementById('cameraBtn');
+            const previewBox = document.getElementById('cameraPreviewBox');
+            const offState = document.getElementById('cameraOffState');
+            const onState = document.getElementById('cameraOnState');
+            const video = document.getElementById('videoPreview');
+
+            cameraEnabled = !cameraEnabled;
+
+            if (cameraEnabled) {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: micEnabled
+                    });
+
+                    video.srcObject = stream;
+                    offState.style.display = 'none';
+                    onState.style.display = 'block';
+                    previewBox.classList.add('camera-on');
+                    btn.classList.add('active');
+
+                    if (blurEnabled) {
+                        video.style.filter = 'blur(6px)';
+                    } else {
+                        video.style.filter = 'none';
+                    }
+                } catch (err) {
+                    console.error('Error accessing camera:', err);
+                    cameraEnabled = false;
+                    alert('Unable to access camera. Please check permissions.');
+                }
+            } else {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    stream = null;
+                }
+
+                video.srcObject = null;
+                offState.style.display = 'flex';
+                onState.style.display = 'none';
+                previewBox.classList.remove('camera-on');
+                btn.classList.remove('active');
+            }
+        }
+
+        function toggleSpeaker() {
+            speakerEnabled = !speakerEnabled;
+            const btn = document.getElementById('speakerBtn');
+
+            if (speakerEnabled) {
+                btn.classList.remove('muted');
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+                btn.classList.add('muted');
+            }
+        }
+
+        function toggleBlur() {
+            blurEnabled = !blurEnabled;
+            const btn = document.getElementById('blurBtn');
+            const video = document.getElementById('videoPreview');
+
+            if (blurEnabled) {
+                btn.classList.add('active');
+                if (video) video.style.filter = 'blur(6px)';
+            } else {
+                btn.classList.remove('active');
+                if (video) video.style.filter = 'none';
+            }
+        }
+
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('meetingPassword');
+            const icon = document.getElementById('passwordIcon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.innerHTML = `
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                `;
+            } else {
+                passwordInput.type = 'password';
+                icon.innerHTML = `
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                `;
+            }
+        }
+
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('meetingId').value = text;
+            } catch (err) {
+                console.error('Failed to read clipboard:', err);
+                alert('Unable to paste from clipboard automatically.');
+            }
+        }
+
+        function selectRecentMeeting(id, pwd) {
+            document.getElementById('meetingId').value = id;
+            document.getElementById('meetingPassword').value = pwd;
+        }
+
+        function joinMeeting() {
+            const meetingId = document.getElementById('meetingId').value.trim();
+            const password = document.getElementById('meetingPassword').value.trim();
+            const displayName = document.getElementById('displayName').value.trim();
+
+            if (!meetingId) {
+                alert('Please enter a meeting ID.');
+                return;
+            }
+
+            if (!password) {
+                alert('Please enter the meeting password.');
+                return;
+            }
+
+            if (!displayName) {
+                alert('Please enter your display name.');
+                return;
+            }
+
+            const url = `call-room.html?role=guest&room=${encodeURIComponent(meetingId)}&pwd=${encodeURIComponent(password)}&name=${encodeURIComponent(displayName)}`;
+            window.location.href = url;
+        }
+
+        function loadQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            const room = params.get('room') || '';
+            const pwd = params.get('pwd') || '';
+            const name = params.get('name') || '';
+
+            if (room) document.getElementById('meetingId').value = room;
+            if (pwd) document.getElementById('meetingPassword').value = pwd;
+            if (name) document.getElementById('displayName').value = name;
+        }
+
+        document.getElementById('displayName').addEventListener('input', updateDisplayTag);
+
+        window.addEventListener('load', () => {
+            updateHeaderTime();
+            setInterval(updateHeaderTime, 30000);
+            loadQueryParams();
+            updateDisplayTag();
+        });
+    </script>
+</body>
+</html>

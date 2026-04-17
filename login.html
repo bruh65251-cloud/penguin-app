@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Penguin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --accent-blue: #2563eb;
+            --accent-blue-hover: #1d4ed8;
+            --accent-coral: #e85a4f;
+            --text-dark: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --warning: #d97706;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 30px 40px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            text-decoration: none;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 2px;
+        }
+
+        .logo-dot {
+            color: var(--accent-coral);
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background-color: #ffffff;
+            border-radius: 18px;
+            padding: 40px 48px;
+            width: 100%;
+            max-width: 430px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            margin-bottom: 20px;
+        }
+
+        .login-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #111827;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            text-align: center;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .status-message {
+            display: none;
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-message.success {
+            background: rgba(34,197,94,0.10);
+            color: #166534;
+            border: 1px solid rgba(34,197,94,0.22);
+        }
+
+        .status-message.error {
+            background: rgba(239,68,68,0.10);
+            color: #991b1b;
+            border: 1px solid rgba(239,68,68,0.18);
+        }
+
+        .status-message.warning {
+            background: rgba(217,119,6,0.10);
+            color: #92400e;
+            border: 1px solid rgba(217,119,6,0.18);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #111827;
+        }
+
+        .forgot-link,
+        .signup-link {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .forgot-link:hover,
+        .signup-link:hover {
+            text-decoration: underline;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            color: #111827;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
+        }
+
+        .form-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .password-input {
+            padding-right: 56px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .password-toggle:hover {
+            color: #111827;
+        }
+
+        .field-error {
+            margin-top: 7px;
+            font-size: 12px;
+            color: var(--danger);
+            display: none;
+        }
+
+        .field-error.show {
+            display: block;
+        }
+
+        .remember-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .remember-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        .remember-box input {
+            accent-color: var(--accent-blue);
+        }
+
+        .login-button {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-blue), #3b82f6);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+            margin-bottom: 18px;
+        }
+
+        .login-button:hover {
+            background: linear-gradient(135deg, var(--accent-blue-hover), #2563eb);
+            transform: translateY(-1px);
+        }
+
+        .login-button:disabled {
+            opacity: 0.75;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 18px 0 20px;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .divider-text {
+            font-size: 12px;
+            color: #9ca3af;
+            white-space: nowrap;
+        }
+
+        .demo-box {
+            padding: 14px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 18px;
+        }
+
+        .demo-box-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 6px;
+        }
+
+        .demo-box-text {
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.55;
+        }
+
+        .signup-prompt {
+            text-align: center;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        @media (max-width: 640px) {
+            .header {
+                padding: 24px 20px;
+            }
+
+            .login-card {
+                padding: 28px 22px;
+            }
+
+            .login-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="login.html" class="logo">
+            <span class="logo-text">Penguin</span>
+            <span class="logo-dot">.</span>
+        </a>
+    </header>
+
+    <main class="main-content">
+        <div class="login-card">
+            <h1 class="login-title">Welcome Back</h1>
+            <p class="login-subtitle">
+                Log in to continue to your workspace dashboard, meetings, team chat, schedule, friends, and settings.
+            </p>
+
+            <div id="statusMessage" class="status-message"></div>
+
+            <div class="demo-box">
+                <div class="demo-box-title">Prototype login flow</div>
+                <div class="demo-box-text">
+                    Use an account created from the signup page. This demo stores account data in your browser only.
+                </div>
+            </div>
+
+            <form id="loginForm" novalidate>
+                <div class="form-group">
+                    <div class="label-row">
+                        <label class="form-label" for="email">Email Address</label>
+                    </div>
+                    <div class="input-wrapper">
+                        <input type="email" id="email" class="form-input" placeholder="Enter your email">
+                    </div>
+                    <div class="field-error" id="emailError">Please enter a valid email address.</div>
+                </div>
+
+                <div class="form-group">
+                    <div class="label-row">
+                        <label class="form-label" for="password">Password</label>
+                        <a href="#" class="forgot-link" id="forgotPasswordLink">Forgot password?</a>
+                    </div>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" class="form-input password-input" placeholder="Enter your password">
+                        <button type="button" class="password-toggle" id="passwordToggle">Show</button>
+                    </div>
+                    <div class="field-error" id="passwordError">Please enter your password.</div>
+                </div>
+
+                <div class="remember-row">
+                    <label class="remember-box">
+                        <input type="checkbox" id="rememberMe">
+                        <span>Remember me</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="login-button" id="loginButton">Log In</button>
+            </form>
+
+            <div class="divider">
+                <div class="divider-line"></div>
+                <div class="divider-text">NEW HERE?</div>
+                <div class="divider-line"></div>
+            </div>
+
+            <div class="signup-prompt">
+                Don’t have an account?
+                <a href="signup.html" class="signup-link">Sign Up</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const statusMessage = document.getElementById('statusMessage');
+        const loginButton = document.getElementById('loginButton');
+
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const rememberMeInput = document.getElementById('rememberMe');
+
+        const emailError = document.getElementById('emailError');
+        const passwordError = document.getElementById('passwordError');
+
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message show ${type}`;
+        }
+
+        function clearStatus() {
+            statusMessage.className = 'status-message';
+            statusMessage.textContent = '';
+        }
+
+        function clearErrors() {
+            emailError.classList.remove('show');
+            passwordError.classList.remove('show');
+        }
+
+        function validEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function getStoredUsers() {
+            try {
+                return JSON.parse(localStorage.getItem('penguinUsers') || '[]');
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function loadRememberedEmail() {
+            const rememberedEmail = localStorage.getItem('penguinRememberedEmail');
+            if (rememberedEmail) {
+                emailInput.value = rememberedEmail;
+                rememberMeInput.checked = true;
+            }
+        }
+
+        function showSignupSuccessIfAny() {
+            const successMessage = localStorage.getItem('penguinSignupSuccess');
+            if (successMessage) {
+                showStatus(successMessage, 'success');
+                localStorage.removeItem('penguinSignupSuccess');
+            }
+        }
+
+        function validateForm() {
+            clearErrors();
+            clearStatus();
+
+            const email = emailInput.value.trim().toLowerCase();
+            const password = passwordInput.value;
+
+            let isValid = true;
+
+            if (!validEmail(email)) {
+                emailError.classList.add('show');
+                isValid = false;
+            }
+
+            if (!password) {
+                passwordError.classList.add('show');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        loginForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            if (!validateForm()) return;
+
+            const email = emailInput.value.trim().toLowerCase();
+            const password = passwordInput.value;
+
+            const users = getStoredUsers();
+            const matchedUser = users.find(user => user.email === email && user.password === password);
+
+            if (!matchedUser) {
+                const sameEmailUser = users.find(user => user.email === email);
+
+                if (sameEmailUser) {
+                    showStatus('Incorrect password. Please try again.', 'error');
+                } else {
+                    showStatus('Account not found. Please sign up first.', 'warning');
+                }
+                return;
+            }
+
+            const currentUser = {
+                id: matchedUser.id,
+                fullName: matchedUser.fullName,
+                email: matchedUser.email
+            };
+
+            sessionStorage.setItem('penguinCurrentUser', JSON.stringify(currentUser));
+
+            if (rememberMeInput.checked) {
+                localStorage.setItem('penguinRememberedEmail', email);
+            } else {
+                localStorage.removeItem('penguinRememberedEmail');
+            }
+
+            loginButton.disabled = true;
+            showStatus('Login successful. Redirecting to dashboard...', 'success');
+
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1000);
+        });
+
+        document.getElementById('passwordToggle').addEventListener('click', function () {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                this.textContent = 'Hide';
+            } else {
+                passwordInput.type = 'password';
+                this.textContent = 'Show';
+            }
+        });
+
+        document.getElementById('forgotPasswordLink').addEventListener('click', function (event) {
+            event.preventDefault();
+            showStatus('Forgot password is a placeholder in this prototype. Please use your demo signup credentials.', 'warning');
+        });
+
+        [emailInput, passwordInput].forEach(input => {
+            input.addEventListener('input', clearStatus);
+        });
+
+        loadRememberedEmail();
+        showSignupSuccessIfAny();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call Room - Penguin.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script type="module">
+        import {
+            GestureRecognizer,
+            FilesetResolver
+        } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3";
+
+        window.__GestureModule = {
+            GestureRecognizer,
+            FilesetResolver
+        };
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #151515;
+            --bg-hover: #1f1f1f;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1a1;
+            --text-muted: #6b6b6b;
+            --border-color: #262626;
+            --accent-blue: #2563eb;
+            --accent-blue-hover: #1d4ed8;
+            --accent-coral: #e85a4f;
+            --accent-green: #22c55e;
+            --accent-purple: #8b5cf6;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: rgba(10,10,10,0.92);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ffffff;
+            text-decoration: none;
+            letter-spacing: 2px;
+        }
+
+        .logo span {
+            color: var(--accent-coral);
+        }
+
+        .meeting-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .meeting-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .meeting-subtitle {
+            font-size: 12px;
+            color: rgba(255,255,255,0.55);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.8);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+        }
+
+        .status-dot.warn {
+            background: var(--warning);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            height: calc(100vh - 76px);
+        }
+
+        .call-stage {
+            position: relative;
+            background: radial-gradient(circle at top, #16233d 0%, #0a0f18 40%, #070b11 100%);
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .video-stage {
+            position: relative;
+            width: 100%;
+            height: calc(100% - 112px);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: #0d1520;
+        }
+
+        .remote-video,
+        .local-video {
+            position: absolute;
+            object-fit: cover;
+            background: #000;
+        }
+
+        .remote-video {
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            transition: box-shadow 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
+        }
+
+        .remote-video.remote-focus {
+            box-shadow: inset 0 0 0 3px rgba(34,197,94,0.9);
+        }
+
+        .remote-video.remote-dim {
+            filter: brightness(0.8);
+        }
+
+        .local-video {
+            width: 260px;
+            height: 160px;
+            right: 18px;
+            top: 18px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.14);
+            z-index: 3;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.28);
+            transition: box-shadow 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
+        }
+
+        .local-video.local-focus {
+            box-shadow: 0 0 0 3px rgba(34,197,94,0.95), 0 12px 28px rgba(0,0,0,0.28);
+        }
+
+        .local-video.local-dim {
+            filter: brightness(0.8);
+        }
+
+        .video-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 2;
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+            padding: 24px;
+        }
+
+        .video-placeholder.hidden {
+            display: none;
+        }
+
+        .video-placeholder .avatar {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .name-tag {
+            position: absolute;
+            left: 16px;
+            bottom: 16px;
+            z-index: 4;
+            background: rgba(0,0,0,0.52);
+            backdrop-filter: blur(8px);
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .name-tag .mic-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+        }
+
+        .name-tag .mic-dot.off {
+            background: var(--danger);
+        }
+
+        .remote-tag {
+            left: 16px;
+            top: 16px;
+            bottom: auto;
+            z-index: 6;
+        }
+
+        .live-subtitle {
+            position: absolute;
+            left: 16px;
+            right: 16px;
+            bottom: 72px;
+            z-index: 5;
+            background: rgba(0,0,0,0.72);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            padding: 12px 14px;
+            display: none;
+        }
+
+        .live-subtitle.active {
+            display: block;
+        }
+
+        .subtitle-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 6px;
+        }
+
+        .subtitle-original {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+            line-height: 1.5;
+        }
+
+        .subtitle-translated {
+            font-size: 13px;
+            color: #93c5fd;
+            line-height: 1.5;
+        }
+
+        .gesture-badge {
+            position: absolute;
+            top: 62px;
+            left: 16px;
+            z-index: 5;
+            background: rgba(37,99,235,0.22);
+            border: 1px solid rgba(96,165,250,0.38);
+            color: #bfdbfe;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+            display: none;
+            max-width: 260px;
+        }
+
+        .gesture-badge.active {
+            display: inline-flex;
+        }
+
+        .focus-badge {
+            position: absolute;
+            top: 102px;
+            left: 16px;
+            z-index: 5;
+            background: rgba(34,197,94,0.18);
+            border: 1px solid rgba(34,197,94,0.35);
+            color: #bbf7d0;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            display: none;
+            max-width: 280px;
+        }
+
+        .focus-badge.active {
+            display: inline-flex;
+        }
+
+        .call-controls {
+            height: 96px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding-top: 16px;
+        }
+
+        .control-btn {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .control-btn:hover {
+            background: rgba(255,255,255,0.18);
+        }
+
+        .control-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .control-btn.active {
+            background: rgba(37,99,235,0.25);
+            border: 1px solid rgba(37,99,235,0.4);
+        }
+
+        .control-btn.muted {
+            background: rgba(239,68,68,0.22);
+            border: 1px solid rgba(239,68,68,0.35);
+        }
+
+        .control-btn.end-call {
+            background: rgba(239,68,68,0.95);
+        }
+
+        .control-btn.end-call:hover {
+            background: rgba(220,38,38,1);
+        }
+
+        .control-tooltip {
+            position: absolute;
+            bottom: -26px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: rgba(255,255,255,0.6);
+            white-space: nowrap;
+        }
+
+        .assist-panel {
+            border-left: 1px solid rgba(255,255,255,0.08);
+            background: var(--bg-secondary);
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+        }
+
+        .panel-header {
+            padding: 22px 22px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .panel-subtitle {
+            font-size: 13px;
+            line-height: 1.55;
+            color: rgba(255,255,255,0.58);
+        }
+
+        .panel-body {
+            padding: 20px 22px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            overflow-y: auto;
+        }
+
+        .assist-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 18px;
+        }
+
+        .assist-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .assist-note {
+            font-size: 12px;
+            color: rgba(255,255,255,0.52);
+            line-height: 1.55;
+            margin-top: 10px;
+        }
+
+        .data-box {
+            width: 100%;
+            min-height: 66px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(0,0,0,0.22);
+            padding: 12px 14px;
+            color: rgba(255,255,255,0.88);
+            font-size: 13px;
+            line-height: 1.55;
+            word-break: break-word;
+        }
+
+        .label {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 8px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .mini-box {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .mini-box .mini-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 6px;
+        }
+
+        .mini-box .mini-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.88);
+        }
+
+        .feature-status {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .feature-pill {
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.7);
+        }
+
+        .feature-pill.on {
+            background: rgba(37,99,235,0.18);
+            border-color: rgba(37,99,235,0.32);
+            color: #bfdbfe;
+        }
+
+        @media (max-width: 1180px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .assist-panel {
+                border-left: none;
+                border-top: 1px solid rgba(255,255,255,0.08);
+            }
+        }
+
+        @media (max-width: 760px) {
+            .header {
+                padding: 0 16px;
+            }
+
+            .meeting-meta {
+                display: none;
+            }
+
+            .call-stage {
+                padding: 12px;
+            }
+
+            .video-stage {
+                height: calc(100% - 104px);
+            }
+
+            .local-video {
+                width: 170px;
+                height: 110px;
+                right: 12px;
+                top: 12px;
+            }
+
+            .call-controls {
+                gap: 10px;
+                flex-wrap: wrap;
+                height: auto;
+                padding: 16px 0 4px;
+            }
+
+            .control-tooltip {
+                display: none;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .focus-badge {
+                max-width: calc(100% - 32px);
+                top: 106px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="dashboard.html" class="logo">Penguin<span>.</span></a>
+            <div class="meeting-meta">
+                <div class="meeting-title" id="meetingTitle">Live Call Room</div>
+                <div class="meeting-subtitle" id="meetingSubtitle">Preparing meeting...</div>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <div class="status-pill">
+                <span class="status-dot" id="connectionDot"></span>
+                <span id="connectionText">Connecting...</span>
+            </div>
+            <div class="user-avatar" id="headerAvatar">ME</div>
+        </div>
+    </header>
+
+    <main class="main-layout">
+        <section class="call-stage">
+            <div class="video-stage">
+                <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
+                <video id="videoPreview" class="local-video" autoplay muted playsinline></video>
+
+                <div class="video-placeholder" id="remotePlaceholder">
+                    <div class="avatar" id="remoteAvatar">R</div>
+                    <div id="remotePlaceholderText">Waiting for the other participant to join...</div>
+                </div>
+
+                <div class="gesture-badge" id="gestureBadge">Gesture detected</div>
+                <div class="focus-badge" id="focusBadge">Speaking balance active</div>
+
+                <div class="live-subtitle" id="liveSubtitle">
+                    <div class="subtitle-label">Live Assist Subtitle</div>
+                    <div class="subtitle-original" id="subtitleOriginal">Listening...</div>
+                    <div class="subtitle-translated" id="subtitleTranslated">Translation will appear here</div>
+                </div>
+
+                <div class="name-tag remote-tag">
+                    <div class="mic-dot" id="remoteMicDot"></div>
+                    <span id="remoteNameTag">Remote Participant</span>
+                </div>
+
+                <div class="name-tag">
+                    <div class="mic-dot" id="micDot"></div>
+                    <span id="localNameTag">You</span>
+                </div>
+            </div>
+
+            <div class="call-controls">
+                <button class="control-btn active" id="micBtn" onclick="toggleMic()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                    <div class="control-tooltip">Mic</div>
+                </button>
+
+                <button class="control-btn active" id="cameraBtn" onclick="toggleCamera()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 7l-7 5 7 5V7z"></path>
+                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                    </svg>
+                    <div class="control-tooltip">Camera</div>
+                </button>
+
+                <button class="control-btn active" id="speakerBtn" onclick="toggleSpeaker()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                    <div class="control-tooltip">Speaker</div>
+                </button>
+
+                <button class="control-btn" id="blurBtn" onclick="toggleBlur()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line>
+                        <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line>
+                        <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line>
+                        <line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line>
+                    </svg>
+                    <div class="control-tooltip">Blur</div>
+                </button>
+
+                <button class="control-btn" id="translateBtn" onclick="toggleTranslateAssist()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 8l6 6"></path>
+                        <path d="M4 14l6-6 2-3"></path>
+                        <path d="M2 5h12"></path>
+                        <path d="M7 2h1"></path>
+                        <path d="M22 22l-5-10-5 10"></path>
+                        <path d="M14 18h6"></path>
+                    </svg>
+                    <div class="control-tooltip">Translate</div>
+                </button>
+
+                <button class="control-btn" id="gestureBtn" onclick="toggleGestureAssist()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 13V5a1 1 0 0 1 2 0v6"></path>
+                        <path d="M12 11V3a1 1 0 0 1 2 0v8"></path>
+                        <path d="M16 13V7a1 1 0 0 1 2 0v8"></path>
+                        <path d="M4 14.5a1.5 1.5 0 0 1 3 0V16"></path>
+                        <path d="M18 19c0 1.7-1.3 3-3 3H9a4 4 0 0 1-4-4v-3"></path>
+                    </svg>
+                    <div class="control-tooltip">Gesture</div>
+                </button>
+
+                <button class="control-btn end-call" onclick="leaveCall()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.72 19.72 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.72 19.72 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.63 2.62a2 2 0 0 1-.45 2.11L8 10a16 16 0 0 0 6 6l1.55-1.24a2 2 0 0 1 2.11-.45c.84.3 1.72.51 2.62.63A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                    <div class="control-tooltip">Leave</div>
+                </button>
+            </div>
+        </section>
+
+        <aside class="assist-panel">
+            <div class="panel-header">
+                <div class="panel-title">Meeting Assist</div>
+                <div class="panel-subtitle">
+                    Translation, gesture recognition, and speaking balance are available only inside the active call room.
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <div class="assist-card">
+                    <h3>Meeting Information</h3>
+                    <div class="info-grid">
+                        <div class="mini-box">
+                            <div class="mini-label">Role</div>
+                            <div class="mini-value" id="roleValue">-</div>
+                        </div>
+                        <div class="mini-box">
+                            <div class="mini-label">Room ID</div>
+                            <div class="mini-value" id="roomValue">-</div>
+                        </div>
+                        <div class="mini-box">
+                            <div class="mini-label">Password</div>
+                            <div class="mini-value" id="pwdValue">-</div>
+                        </div>
+                        <div class="mini-box">
+                            <div class="mini-label">Display Name</div>
+                            <div class="mini-value" id="nameValue">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="assist-card">
+                    <h3>Assist Features</h3>
+                    <div class="feature-status">
+                        <div class="feature-pill" id="translatePill">Translation Off</div>
+                        <div class="feature-pill" id="gesturePill">Gesture Off</div>
+                    </div>
+                    <div class="assist-note">
+                        Turn on Translate to auto-listen for supported phrases. Turn on Gesture to use the real hand gesture recognizer from your camera feed.
+                    </div>
+                </div>
+
+                <div class="assist-card">
+                    <div class="label">Recognized Speech / Phrase</div>
+                    <div class="data-box" id="recognizedSpeech">No speech recognized yet.</div>
+                </div>
+
+                <div class="assist-card">
+                    <div class="label">Translated Output</div>
+                    <div class="data-box" id="translatedSpeech">No translation yet.</div>
+                </div>
+
+                <div class="assist-card">
+                    <div class="label">Gesture Meaning</div>
+                    <div class="data-box" id="gestureMeaning">No gesture detected yet.</div>
+                </div>
+
+                <div class="assist-card">
+                    <div class="label">Speaking Balance</div>
+                    <div class="data-box" id="focusStatus">Waiting for microphone activity.</div>
+                </div>
+
+                <div class="assist-card">
+                    <div class="label">Speaking Duration</div>
+                    <div class="data-box" id="focusTimer">0 seconds</div>
+                </div>
+
+                <div class="assist-card">
+                    <div class="label">Connection Log</div>
+                    <div class="data-box" id="connectionLog">Preparing local media...</div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+    
+        let peer = null;
+        let currentCall = null;
+        let localStream = null;
+
+        let micEnabled = true;
+        let cameraEnabled = true;
+        let speakerEnabled = true;
+        let blurEnabled = false;
+
+        let recognition = null;
+        let translateActive = false;
+        let gestureActive = false;
+
+        let gestureRecognizer = null;
+        let gestureLoopRunning = false;
+        let lastVideoTime = -1;
+        let lastGestureOutput = '';
+        let lastSubtitleOutput = '';
+
+        let audioContext = null;
+        let analyser = null;
+        let microphoneSource = null;
+        let speakingMonitorTimer = null;
+        let speechStartedAt = null;
+        let silenceStartedAt = null;
+        let lastFocusMessage = '';
+        let currentFocusState = 'idle';
+
+        const params = new URLSearchParams(window.location.search);
+        const role = params.get('role') || 'guest';
+        const roomId = params.get('room') || 'UNKNOWN';
+        const pwd = params.get('pwd') || '----';
+        const displayName = params.get('name') || (role === 'host' ? 'Host' : 'Guest');
+
+        const trainedPhrases = [
+            {
+                key: "你好",
+                thai: "สวัสดี",
+                english: "Hello",
+                aliases: [
+                    "你好","ni hao","nihao","nee hao","neehow","ni how","nihow","mi hao","ming hao","nee ho","ni ho",
+                    "n hao","niha","ni hau","nihaw","ni haow","nihaoo","nihaow","nee haow","ni aow","ni ao","ni hou",
+                    "ni hu","ni huow","nihoww","nee how","nee howw","neehao","niha0","nihaooo","hello ni hao",
+                    "knee hao","knee how","kneehow","nihaw","nihow","mihao","minghow","nihauw","neehau","nihowe"
+                ]
+            },
+            {
+                key: "谢谢",
+                thai: "ขอบคุณ",
+                english: "Thank you",
+                aliases: [
+                    "谢谢","xie xie","xiexie","sie sie","she she","shay shay","che che","se se","xie sie","sie xie",
+                    "shei shei","say say","thank you","tank you","thank u","thanks","thankyou","thx","tnx","tank u",
+                    "tanq you","thank yoo","thank yu","thanks you","shie shie","shieh shieh","xia xia","shea shea",
+                    "chee chee","thankyuu","tank yoo","tengkyu","thank yew"
+                ]
+            },
+            {
+                key: "我听不懂",
+                thai: "ฉันไม่เข้าใจ",
+                english: "I don't understand",
+                aliases: [
+                    "我听不懂","wo ting bu dong","wo ting budong","wo ding bu dong","wo ting pu dong","wo tin bu dong",
+                    "i dont understand","i don't understand","dont understand","do not understand","not understand",
+                    "i no understand","i cant understand","can't understand","cannot understand","not getting it",
+                    "i cant get it","i can't get it","i dont get it","i don't get it","no understand",
+                    "understand no","wo bu dong","ting bu dong","mai khao jai","chan mai khao jai"
+                ]
+            },
+            {
+                key: "请再说一遍",
+                thai: "กรุณาพูดอีกครั้ง",
+                english: "Please say that again",
+                aliases: [
+                    "请再说一遍","qing zai shuo yi bian","ching zai shuo yi bian","please say again","say that again",
+                    "please repeat","repeat again","can you repeat","say again","qing zai shuo","ching zai shuo",
+                    "say it again","say again pls","say again please","pls repeat","repeat pls","repeat please",
+                    "could you repeat","can you say it again","please speak again","again please","one more time please"
+                ]
+            },
+            {
+                key: "你听得到我吗",
+                thai: "คุณได้ยินฉันไหม",
+                english: "Can you hear me?",
+                aliases: [
+                    "你听得到我吗","ni ting de dao wo ma","ni ting dao wo ma","ni ting de dao ma","can you hear me",
+                    "can u hear me","hear me","you hear me","do you hear me","hello can you hear me",
+                    "you can hear me","can anyone hear me","am i audible","can you hear me now","hear me now",
+                    "do you hear me now","khun dai yin chan mai"
+                ]
+            },
+            {
+                key: "สวัสดี",
+                thai: "สวัสดี",
+                english: "Hello",
+                aliases: [
+                    "สวัสดี","sawasdee","sawadee","sawasdi","sa wad dee","sa was dee","hello","helo","hi","hey",
+                    "hii","heyy","hello there","sawatdee","sawatdee","sa wat dee","sa watdi","sawadeekha"
+                ]
+            },
+            {
+                key: "ขอบคุณ",
+                thai: "ขอบคุณ",
+                english: "Thank you",
+                aliases: [
+                    "ขอบคุณ","khob khun","kob kun","kop khun","khobkun","thank you","thanks","thank u","tank you",
+                    "thx","tnx","khop khun","korp khun","khob khun na","thanks a lot","thank you so much"
+                ]
+            },
+            {
+                key: "ฉันไม่เข้าใจ",
+                thai: "ฉันไม่เข้าใจ",
+                english: "I don't understand",
+                aliases: [
+                    "ฉันไม่เข้าใจ","chan mai khao jai","mai khao jai","i dont understand","i don't understand",
+                    "dont understand","not understand","do not understand","i dont get it","i don't get it",
+                    "not clear to me","mai kao jai","chan mai kao jai"
+                ]
+            },
+            {
+                key: "กรุณาพูดอีกครั้ง",
+                thai: "กรุณาพูดอีกครั้ง",
+                english: "Please say that again",
+                aliases: [
+                    "กรุณาพูดอีกครั้ง","karuna phut ik krang","พูดอีกครั้ง","please say that again","please repeat",
+                    "say that again","say again","repeat please","please speak again","one more time","say again please"
+                ]
+            },
+            {
+                key: "คุณได้ยินฉันไหม",
+                thai: "คุณได้ยินฉันไหม",
+                english: "Can you hear me?",
+                aliases: [
+                    "คุณได้ยินฉันไหม","khun dai yin chan mai","can you hear me","you hear me","hear me",
+                    "can u hear me","do you hear me","can you hear me now","am i audible","hear me now"
+                ]
+            },
+            {
+                key: "Hello",
+                thai: "สวัสดี",
+                english: "Hello",
+                aliases: [
+                    "hello","helo","hi","hey","hullo","hello there","hi there","hey there","yo hello","hello hello"
+                ]
+            },
+            {
+                key: "Thank you",
+                thai: "ขอบคุณ",
+                english: "Thank you",
+                aliases: [
+                    "thank you","thanks","thank u","tank you","thankyou","thx","tnx","thanks a lot","thank you so much"
+                ]
+            },
+            {
+                key: "I don't understand",
+                thai: "ฉันไม่เข้าใจ",
+                english: "I don't understand",
+                aliases: [
+                    "i don't understand","i dont understand","dont understand","do not understand","not understand",
+                    "i don't get it","i dont get it","not getting it","cannot understand","can't understand"
+                ]
+            },
+            {
+                key: "Please say that again",
+                thai: "กรุณาพูดอีกครั้ง",
+                english: "Please say that again",
+                aliases: [
+                    "please say that again","say again","please repeat","repeat please","can you repeat","say it again",
+                    "one more time please","again please","please speak again"
+                ]
+            },
+            {
+                key: "Can you hear me?",
+                thai: "คุณได้ยินฉันไหม",
+                english: "Can you hear me?",
+                aliases: [
+                    "can you hear me","can u hear me","hear me","do you hear me","you hear me",
+                    "can you hear me now","am i audible","do you hear me now","hear me now"
+                ]
+            }
+        ];
+
+        const gestureMeaningMap = {
+            open_palm: {
+                title: "Hello",
+                thai: "สวัสดี",
+                chinese: "你好",
+                english: "Hello"
+            },
+            closed_fist: {
+                title: "No / Stop",
+                thai: "ไม่ / หยุด",
+                chinese: "不 / 停止",
+                english: "No / Stop"
+            },
+            point_up: {
+                title: "Wait / One",
+                thai: "รอสักครู่ / หนึ่ง",
+                chinese: "等一下 / 一",
+                english: "Wait / One"
+            },
+            thumb_up: {
+                title: "Yes / Good",
+                thai: "ใช่ / ดี",
+                chinese: "是 / 好",
+                english: "Yes / Good"
+            },
+            victory: {
+                title: "Peace / Two",
+                thai: "สันติ / สอง",
+                chinese: "和平 / 二",
+                english: "Peace / Two"
+            }
+        };
+
+        function setConnectionStatus(text, state = 'warn') {
+            document.getElementById('connectionText').textContent = text;
+            const dot = document.getElementById('connectionDot');
+            dot.classList.toggle('warn', state === 'warn');
+            if (state === 'ok') dot.style.background = '#22c55e';
+            else if (state === 'danger') dot.style.background = '#ef4444';
+            else dot.style.background = '#f59e0b';
+        }
+
+        function logConnection(message) {
+            const box = document.getElementById('connectionLog');
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            box.textContent = `[${time}] ${message}\n\n` + box.textContent;
+        }
+
+        function initials(name) {
+            return (name || 'ME')
+                .split(' ')
+                .map(part => part[0])
+                .join('')
+                .slice(0, 2)
+                .toUpperCase();
+        }
+
+        function updateMeetingInfo() {
+            document.getElementById('meetingTitle').textContent = role === 'host' ? 'Host Call Room' : 'Guest Call Room';
+            document.getElementById('meetingSubtitle').textContent = `Room ${roomId} • Password ${pwd}`;
+            document.getElementById('roleValue').textContent = role.toUpperCase();
+            document.getElementById('roomValue').textContent = roomId;
+            document.getElementById('pwdValue').textContent = pwd;
+            document.getElementById('nameValue').textContent = displayName;
+            document.getElementById('localNameTag').textContent = `${displayName} (You)`;
+            document.getElementById('headerAvatar').textContent = initials(displayName);
+        }
+
+        async function startLocalMedia() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+
+                document.getElementById('videoPreview').srcObject = localStream;
+                logConnection('Local camera and microphone started.');
+                setupSpeakingMonitor();
+            } catch (err) {
+                console.error(err);
+                logConnection('Failed to access local camera or microphone.');
+                setConnectionStatus('Media blocked', 'danger');
+                alert('Unable to access camera/microphone. Please allow permissions.');
+            }
+        }
+
+        function setupPeerRoom() {
+            if (!localStream) return;
+
+            if (role === 'host') {
+                peer = new Peer(roomId);
+
+                peer.on('open', () => {
+                    setConnectionStatus('Waiting for guest...', 'warn');
+                    logConnection(`Host ready. Waiting for guest in room ${roomId}.`);
+                });
+
+                peer.on('call', (incomingCall) => {
+                    currentCall = incomingCall;
+                    currentCall.answer(localStream);
+                    logConnection('Incoming guest call accepted.');
+
+                    currentCall.on('stream', (remoteStream) => {
+                        attachRemoteStream(remoteStream);
+                    });
+
+                    currentCall.on('close', () => {
+                        showRemotePlaceholder(true);
+                        setConnectionStatus('Guest disconnected', 'warn');
+                        logConnection('Guest disconnected from the room.');
+                        setFocusState('idle', 'Remote participant disconnected. Speaking balance paused.');
+                    });
+                });
+            } else {
+                peer = new Peer();
+
+                peer.on('open', (guestId) => {
+                    logConnection(`Guest ready with peer ID ${guestId}. Calling host room ${roomId}...`);
+                    setConnectionStatus('Joining host...', 'warn');
+
+                    currentCall = peer.call(roomId, localStream);
+
+                    currentCall.on('stream', (remoteStream) => {
+                        attachRemoteStream(remoteStream);
+                    });
+
+                    currentCall.on('close', () => {
+                        showRemotePlaceholder(true);
+                        setConnectionStatus('Host disconnected', 'warn');
+                        logConnection('Host disconnected from the room.');
+                        setFocusState('idle', 'Remote participant disconnected. Speaking balance paused.');
+                    });
+                });
+            }
+
+            peer.on('error', (err) => {
+                console.error(err);
+                setConnectionStatus('Connection error', 'danger');
+                logConnection(`Peer error: ${err.type || err.message}`);
+            });
+        }
+
+        function attachRemoteStream(remoteStream) {
+            const remoteVideo = document.getElementById('remoteVideo');
+            remoteVideo.srcObject = remoteStream;
+            showRemotePlaceholder(false);
+            setConnectionStatus('Connected', 'ok');
+            logConnection('Remote participant video stream connected.');
+            setFocusState('idle', 'Meeting connected. Waiting for speaking activity.');
+        }
+
+        function showRemotePlaceholder(show) {
+            document.getElementById('remotePlaceholder').classList.toggle('hidden', !show);
+        }
+
+        function toggleMic() {
+            micEnabled = !micEnabled;
+            document.getElementById('micBtn').classList.toggle('muted', !micEnabled);
+            document.getElementById('micBtn').classList.toggle('active', micEnabled);
+            document.getElementById('micDot').classList.toggle('off', !micEnabled);
+
+            if (localStream) {
+                localStream.getAudioTracks().forEach(track => {
+                    track.enabled = micEnabled;
+                });
+            }
+
+            if (!micEnabled) {
+                clearSpeakingState('Microphone muted. Speaking balance paused.');
+            } else {
+                setFocusState('idle', 'Microphone active. Listening for your speaking turn.');
+            }
+        }
+
+        function toggleCamera() {
+            cameraEnabled = !cameraEnabled;
+            document.getElementById('cameraBtn').classList.toggle('muted', !cameraEnabled);
+            document.getElementById('cameraBtn').classList.toggle('active', cameraEnabled);
+
+            if (localStream) {
+                localStream.getVideoTracks().forEach(track => {
+                    track.enabled = cameraEnabled;
+                });
+            }
+
+            document.getElementById('videoPreview').style.visibility = cameraEnabled ? 'visible' : 'hidden';
+        }
+
+        function toggleSpeaker() {
+            speakerEnabled = !speakerEnabled;
+            document.getElementById('speakerBtn').classList.toggle('muted', !speakerEnabled);
+            document.getElementById('speakerBtn').classList.toggle('active', speakerEnabled);
+            document.getElementById('remoteVideo').muted = !speakerEnabled;
+        }
+
+        function toggleBlur() {
+            blurEnabled = !blurEnabled;
+            document.getElementById('blurBtn').classList.toggle('active', blurEnabled);
+            document.getElementById('videoPreview').style.filter = blurEnabled ? 'blur(6px)' : 'none';
+        }
+
+        function normalizeText(text) {
+            return (text || '')
+                .toLowerCase()
+                .trim()
+                .replace(/[.,!?，。！？]/g, '')
+                .replace(/\s+/g, ' ');
+        }
+
+        function cleanInput(text) {
+            return (text || '')
+                .toLowerCase()
+                .replace(/[.,!?，。！？]/g, '')
+                .replace(/\b(uh|um|ah|like|bro|dude|hmm|mmm|eh|oh|er|uhh|umm)\b/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function editDistance(a, b) {
+            const dp = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(0));
+            for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+            for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+
+            for (let i = 1; i <= a.length; i++) {
+                for (let j = 1; j <= b.length; j++) {
+                    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                    dp[i][j] = Math.min(
+                        dp[i - 1][j] + 1,
+                        dp[i][j - 1] + 1,
+                        dp[i - 1][j - 1] + cost
+                    );
+                }
+            }
+            return dp[a.length][b.length];
+        }
+
+        function similarityScore(a, b) {
+            const cleanA = cleanInput(a);
+            const cleanB = cleanInput(b);
+            if (!cleanA || !cleanB) return 0;
+            const distance = editDistance(cleanA, cleanB);
+            return 1 - distance / Math.max(cleanA.length, cleanB.length);
+        }
+
+        function findBestPhraseMatch(input) {
+            const cleanedInput = cleanInput(input);
+            let best = null;
+            let bestScore = 0;
+
+            trainedPhrases.forEach(phrase => {
+                phrase.aliases.forEach(alias => {
+                    const cleanAlias = cleanInput(alias);
+                    let score = similarityScore(cleanedInput, cleanAlias);
+
+                    if (cleanedInput.includes(cleanAlias) || cleanAlias.includes(cleanedInput)) {
+                        score += 0.08;
+                    }
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        best = phrase;
+                    }
+                });
+            });
+
+            return bestScore >= 0.38 ? best : null;
+        }
+
+        function updateSubtitle(original, translated) {
+            const subtitle = document.getElementById('liveSubtitle');
+            const originalEl = document.getElementById('subtitleOriginal');
+            const translatedEl = document.getElementById('subtitleTranslated');
+
+            if (!original && !translated) {
+                subtitle.classList.remove('active');
+                originalEl.textContent = 'Listening...';
+                translatedEl.textContent = 'Translation will appear here';
+                return;
+            }
+
+            const currentKey = `${original}|||${translated}`;
+            if (currentKey === lastSubtitleOutput) return;
+            lastSubtitleOutput = currentKey;
+
+            subtitle.classList.add('active');
+            originalEl.textContent = original;
+            translatedEl.textContent = translated;
+            document.getElementById('recognizedSpeech').textContent = original;
+            document.getElementById('translatedSpeech').textContent = translated;
+        }
+
+        function setTranslateUi(active) {
+            const pill = document.getElementById('translatePill');
+            const btn = document.getElementById('translateBtn');
+            pill.textContent = active ? 'Translation On' : 'Translation Off';
+            pill.classList.toggle('on', active);
+            btn.classList.toggle('active', active);
+        }
+
+        function setGestureUi(active) {
+            const pill = document.getElementById('gesturePill');
+            const btn = document.getElementById('gestureBtn');
+            pill.textContent = active ? 'Gesture On' : 'Gesture Off';
+            pill.classList.toggle('on', active);
+            btn.classList.toggle('active', active);
+        }
+
+        function toggleTranslateAssist() {
+            if (translateActive) {
+                stopTranslationAssist();
+            } else {
+                startTranslationAssist();
+            }
+        }
+
+        function startTranslationAssist() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert('Speech recognition is not supported in this browser. Please use Chrome.');
+                return;
+            }
+
+            if (recognition) {
+                recognition.stop();
+                recognition = null;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 5;
+
+            translateActive = true;
+            setTranslateUi(true);
+            logConnection('Translation assist turned on.');
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[event.results.length - 1][0].transcript;
+                const match = findBestPhraseMatch(transcript);
+
+                if (match) {
+                    const translated = `TH: ${match.thai} | ZH: ${match.key} | EN: ${match.english}`;
+                    updateSubtitle(`Recognized: ${transcript}`, translated);
+                } else {
+                    updateSubtitle(`Recognized: ${transcript}`, 'No matching trained phrase found.');
+                }
+            };
+
+            recognition.onerror = (event) => {
+                logConnection(`Speech recognition error: ${event.error}`);
+            };
+
+            recognition.onend = () => {
+                if (translateActive) {
+                    setTimeout(() => {
+                        try {
+                            recognition.start();
+                        } catch (e) {}
+                    }, 350);
+                }
+            };
+
+            recognition.start();
+        }
+
+        function stopTranslationAssist() {
+            translateActive = false;
+            setTranslateUi(false);
+            if (recognition) {
+                recognition.stop();
+            }
+            logConnection('Translation assist turned off.');
+        }
+
+        async function ensureGestureRecognizer() {
+            if (gestureRecognizer) return gestureRecognizer;
+
+            const mod = window.__GestureModule;
+            if (!mod) {
+                throw new Error('Gesture module not loaded.');
+            }
+
+            const vision = await mod.FilesetResolver.forVisionTasks(
+                "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+            );
+
+            gestureRecognizer = await mod.GestureRecognizer.createFromOptions(vision, {
+                baseOptions: {
+                    modelAssetPath: "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task"
+                },
+                runningMode: "VIDEO",
+                numHands: 1
+            });
+
+            return gestureRecognizer;
+        }
+
+        function toggleGestureAssist() {
+            if (gestureActive) {
+                stopGestureAssist();
+            } else {
+                startGestureAssist();
+            }
+        }
+
+        async function startGestureAssist() {
+            try {
+                await ensureGestureRecognizer();
+                gestureActive = true;
+                setGestureUi(true);
+                gestureLoopRunning = true;
+                logConnection('Gesture assist turned on.');
+                runGestureLoop();
+            } catch (err) {
+                console.error(err);
+                alert('Unable to load gesture recognizer.');
+            }
+        }
+
+        function stopGestureAssist() {
+            gestureActive = false;
+            gestureLoopRunning = false;
+            setGestureUi(false);
+            document.getElementById('gestureBadge').classList.remove('active');
+            document.getElementById('gestureMeaning').textContent = 'No gesture detected yet.';
+            logConnection('Gesture assist turned off.');
+        }
+
+        async function runGestureLoop() {
+            const video = document.getElementById('videoPreview');
+            if (!gestureLoopRunning || !gestureRecognizer || !video || video.readyState < 2) {
+                if (gestureLoopRunning) requestAnimationFrame(runGestureLoop);
+                return;
+            }
+
+            const nowInMs = Date.now();
+
+            if (video.currentTime !== lastVideoTime) {
+                lastVideoTime = video.currentTime;
+                const result = gestureRecognizer.recognizeForVideo(video, nowInMs);
+
+                if (result.gestures && result.gestures.length > 0 && result.gestures[0].length > 0) {
+                    const gestureNameRaw = result.gestures[0][0].categoryName;
+                    const gestureName = normalizeText(gestureNameRaw).replace(/\s+/g, '_');
+                    handleGestureMeaning(gestureName);
+                }
+            }
+
+            if (gestureLoopRunning) {
+                requestAnimationFrame(runGestureLoop);
+            }
+        }
+
+        function handleGestureMeaning(gestureName) {
+            const meaning = gestureMeaningMap[gestureName];
+            if (!meaning) return;
+
+            const output = `${meaning.title} | TH: ${meaning.thai} | ZH: ${meaning.chinese} | EN: ${meaning.english}`;
+            if (output === lastGestureOutput) return;
+            lastGestureOutput = output;
+
+            const badge = document.getElementById('gestureBadge');
+            badge.textContent = `Gesture: ${meaning.title}`;
+            badge.classList.add('active');
+
+            document.getElementById('gestureMeaning').textContent = output;
+            updateSubtitle(`Gesture Detected: ${meaning.title}`, output);
+        }
+
+        function setupSpeakingMonitor() {
+            if (!localStream) return;
+            if (speakingMonitorTimer) return;
+
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 2048;
+                microphoneSource = audioContext.createMediaStreamSource(localStream);
+                microphoneSource.connect(analyser);
+
+                const buffer = new Uint8Array(analyser.fftSize);
+
+                speakingMonitorTimer = setInterval(() => {
+                    if (!analyser) return;
+
+                    if (!micEnabled) {
+                        clearSpeakingState('Microphone muted. Speaking balance paused.');
+                        return;
+                    }
+
+                    if (document.getElementById('remotePlaceholder').classList.contains('hidden') === false) {
+                        setFocusState('idle', 'Waiting for the other participant before tracking turn-taking.');
+                        resetSpeakingVisuals();
+                        return;
+                    }
+
+                    analyser.getByteTimeDomainData(buffer);
+
+                    let sum = 0;
+                    for (let i = 0; i < buffer.length; i++) {
+                        const normalized = (buffer[i] - 128) / 128;
+                        sum += normalized * normalized;
+                    }
+
+                    const rms = Math.sqrt(sum / buffer.length);
+                    const now = Date.now();
+                    const speakingThreshold = 0.045;
+                    const silenceResetMs = 3000;
+                    const reminderMs = 20000;
+
+                    if (rms > speakingThreshold) {
+                        if (!speechStartedAt) {
+                            speechStartedAt = now;
+                            silenceStartedAt = null;
+                            setFocusState('speaking', 'You are currently speaking. Speaking balance is being monitored.');
+                            applyLocalFocus();
+                        }
+
+                        const durationMs = now - speechStartedAt;
+                        const seconds = Math.floor(durationMs / 1000);
+                        document.getElementById('focusTimer').textContent = `${seconds} seconds`;
+
+                        if (durationMs >= reminderMs) {
+                            setFocusState(
+                                'reminder',
+                                'You have been speaking for a while. Consider allowing others to contribute.'
+                            );
+                        }
+                    } else {
+                        if (speechStartedAt) {
+                            if (!silenceStartedAt) silenceStartedAt = now;
+
+                            const silentFor = now - silenceStartedAt;
+                            const spokeFor = now - speechStartedAt;
+                            document.getElementById('focusTimer').textContent = `${Math.floor(spokeFor / 1000)} seconds`;
+
+                            if (silentFor >= silenceResetMs) {
+                                clearSpeakingState('Speaking turn ended. Balance looks good. Waiting for the next turn.');
+                            } else {
+                                setFocusState('idle', 'Speaking pause detected. Waiting to see if you continue.');
+                                applyBalancedVisuals();
+                            }
+                        } else {
+                            setFocusState('idle', 'Waiting for microphone activity.');
+                            document.getElementById('focusTimer').textContent = '0 seconds';
+                            resetSpeakingVisuals();
+                        }
+                    }
+                }, 300);
+            } catch (error) {
+                console.error(error);
+                document.getElementById('focusStatus').textContent = 'Speaking balance monitor could not start in this browser.';
+            }
+        }
+
+        function setFocusState(state, message) {
+            const focusStatus = document.getElementById('focusStatus');
+            const focusBadge = document.getElementById('focusBadge');
+
+            if (state === currentFocusState && message === lastFocusMessage) return;
+
+            currentFocusState = state;
+            lastFocusMessage = message;
+            focusStatus.textContent = message;
+
+            if (state === 'speaking') {
+                focusBadge.textContent = 'Speaking turn detected';
+                focusBadge.classList.add('active');
+            } else if (state === 'reminder') {
+                focusBadge.textContent = 'Balance reminder';
+                focusBadge.classList.add('active');
+            } else {
+                focusBadge.classList.remove('active');
+            }
+        }
+
+        function applyLocalFocus() {
+            document.getElementById('videoPreview').classList.add('local-focus');
+            document.getElementById('videoPreview').classList.remove('local-dim');
+            document.getElementById('remoteVideo').classList.add('remote-dim');
+            document.getElementById('remoteVideo').classList.remove('remote-focus');
+        }
+
+        function applyBalancedVisuals() {
+            document.getElementById('videoPreview').classList.remove('local-focus');
+            document.getElementById('videoPreview').classList.remove('local-dim');
+            document.getElementById('remoteVideo').classList.remove('remote-focus');
+            document.getElementById('remoteVideo').classList.remove('remote-dim');
+        }
+
+        function resetSpeakingVisuals() {
+            document.getElementById('videoPreview').classList.remove('local-focus');
+            document.getElementById('videoPreview').classList.remove('local-dim');
+            document.getElementById('remoteVideo').classList.remove('remote-focus');
+            document.getElementById('remoteVideo').classList.remove('remote-dim');
+        }
+
+        function clearSpeakingState(message) {
+            speechStartedAt = null;
+            silenceStartedAt = null;
+            document.getElementById('focusTimer').textContent = '0 seconds';
+            setFocusState('idle', message);
+            resetSpeakingVisuals();
+        }
+
+        function leaveCall() {
+            try {
+                if (speakingMonitorTimer) clearInterval(speakingMonitorTimer);
+                if (audioContext) audioContext.close();
+                if (currentCall) currentCall.close();
+                if (peer) peer.destroy();
+                if (localStream) localStream.getTracks().forEach(track => track.stop());
+            } catch (e) {}
+
+            window.location.href = 'dashboard.html';
+        }
+
+        window.addEventListener('load', async () => {
+            updateMeetingInfo();
+            document.getElementById('remoteAvatar').textContent = role === 'host' ? 'GU' : 'HO';
+            document.getElementById('remoteNameTag').textContent = role === 'host' ? 'Guest Participant' : 'Host Participant';
+
+            showRemotePlaceholder(true);
+            await startLocalMedia();
+            setupPeerRoom();
+        });
+</script>
+</body>
+</html>

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create an Account - Dark Mode</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #151515;
+            --bg-hover: #1f1f1f;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1a1;
+            --text-muted: #6b6b6b;
+            --border-color: #262626;
+            --accent-blue: #2563eb;
+            --accent-blue-hover: #1d4ed8;
+            --accent-coral: #e85a4f;
+            --accent-green: #22c55e;
+            --accent-yellow: #eab308;
+            --accent-purple: #8b5cf6;
+        }
+
+        body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+        /* Space background with stars */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: radial-gradient(ellipse at bottom, #1a1a2e 0%, #0a0a0f 100%);
+        }
+
+        /* Stars */
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--text-primary);
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+
+        /* Star cluster on right side */
+        .star-cluster {
+            position: absolute;
+            right: 10%;
+            top: 30%;
+            width: 200px;
+            height: 200px;
+        }
+
+        .star-cluster .star {
+            width: 1px;
+            height: 1px;
+            opacity: 0.3;
+        }
+
+        /* Shooting stars / meteors */
+        .meteor {
+            position: absolute;
+            width: 2px;
+            height: 80px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent);
+            transform: rotate(-45deg);
+            opacity: 0.6;
+        }
+
+        .meteor-1 {
+            top: 5%;
+            left: 20%;
+            height: 60px;
+        }
+
+        .meteor-2 {
+            top: 8%;
+            left: 25%;
+            height: 40px;
+        }
+
+        .meteor-3 {
+            top: 2%;
+            left: 35%;
+            height: 50px;
+        }
+
+        .meteor-4 {
+            top: 10%;
+            right: 30%;
+            height: 45px;
+        }
+
+        .meteor-5 {
+            top: 15%;
+            left: 15%;
+            height: 35px;
+        }
+
+        /* Glow effect at bottom */
+        .glow {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 300px;
+            background: radial-gradient(ellipse at center bottom, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+        }
+
+        /* Login Card */
+        .login-card {
+            position: relative;
+            z-index: 1;
+            background-color: var(--bg-card);
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            margin: 20px;
+        }
+
+        .login-card h1 {
+            color: var(--text-primary);
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        /* Social buttons container */
+        .social-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .social-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .social-btn:hover {
+            background-color: var(--bg-hover);
+        }
+
+        .social-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Divider */
+        .divider {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        /* Form styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .forgot-link {
+            color: #9ca3af;
+            font-size: 14px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .forgot-link:hover {
+            color: #3b82f6;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            padding-right: 45px;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            background-color: #0f0f1a;
+            color: #ffffff;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input::placeholder {
+            color: #6b7280;
+        }
+
+        .form-group input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-password svg {
+            width: 20px;
+            height: 20px;
+            color: #6b7280;
+        }
+
+        /* Submit button */
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background-color: #3b82f6;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 8px;
+        }
+
+        .submit-btn:hover {
+            background-color: #2563eb;
+        }
+
+        /* Footer link */
+        .footer-text {
+            text-align: center;
+            margin-top: 24px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .footer-text a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 4px;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 30px 24px;
+                margin: 16px;
+            }
+
+            .social-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Space Background -->
+    <div class="background">
+        <!-- Meteors -->
+        <div class="meteor meteor-1"></div>
+        <div class="meteor meteor-2"></div>
+        <div class="meteor meteor-3"></div>
+        <div class="meteor meteor-4"></div>
+        <div class="meteor meteor-5"></div>
+
+        <!-- Stars -->
+        <div class="stars">
+            <div class="star" style="top: 10%; left: 5%;"></div>
+            <div class="star" style="top: 20%; left: 15%;"></div>
+            <div class="star" style="top: 15%; left: 80%;"></div>
+            <div class="star" style="top: 30%; left: 90%;"></div>
+            <div class="star" style="top: 50%; left: 5%;"></div>
+            <div class="star" style="top: 60%; left: 10%;"></div>
+            <div class="star" style="top: 70%; left: 85%;"></div>
+            <div class="star" style="top: 80%; left: 95%;"></div>
+            <div class="star" style="top: 40%; left: 3%;"></div>
+            <div class="star" style="top: 25%; left: 92%;"></div>
+        </div>
+
+        <!-- Star cluster on right -->
+        <div class="star-cluster">
+            <div class="star" style="top: 10%; left: 20%;"></div>
+            <div class="star" style="top: 15%; left: 30%;"></div>
+            <div class="star" style="top: 20%; left: 25%;"></div>
+            <div class="star" style="top: 25%; left: 40%;"></div>
+            <div class="star" style="top: 30%; left: 35%;"></div>
+            <div class="star" style="top: 35%; left: 50%;"></div>
+            <div class="star" style="top: 40%; left: 45%;"></div>
+            <div class="star" style="top: 45%; left: 60%;"></div>
+            <div class="star" style="top: 50%; left: 55%;"></div>
+            <div class="star" style="top: 55%; left: 70%;"></div>
+            <div class="star" style="top: 60%; left: 65%;"></div>
+            <div class="star" style="top: 65%; left: 75%;"></div>
+            <div class="star" style="top: 70%; left: 80%;"></div>
+            <div class="star" style="top: 75%; left: 85%;"></div>
+            <div class="star" style="top: 80%; left: 90%;"></div>
+        </div>
+
+        <!-- Glow at bottom -->
+        <div class="glow"></div>
+    </div>
+
+    <!-- Login Card -->
+    <div class="login-card">
+        <h1>Create an account</h1>
+
+        <!-- Social Login Buttons -->
+        <div class="social-buttons">
+            <button class="social-btn">
+                <svg viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Google
+            </button>
+            <button class="social-btn">
+                <svg viewBox="0 0 24 24">
+                    <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                Facebook
+            </button>
+        </div>
+
+        <!-- Divider -->
+        <div class="divider">Or</div>
+
+        <!-- Form -->
+        <form>
+            <div class="form-group">
+                <div class="label-row">
+                    <label for="email">Email</label>
+                </div>
+                <div class="input-wrapper">
+                    <input type="email" id="email" value="balamia@gmail.com">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="label-row">
+                    <label for="password">Password</label>
+                    <a href="#" class="forgot-link">Forgot ?</a>
+                </div>
+                <div class="input-wrapper">
+                    <input type="password" id="password" placeholder="Enter your password">
+                    <button type="button" class="toggle-password" onclick="togglePassword()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">Create account</button>
+        </form>
+
+        <!-- Footer -->
+        <p class="footer-text">
+            Already Have An Account ?<a href="login.html">Log In</a>
+        </p>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.querySelector('.toggle-password');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                `;
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

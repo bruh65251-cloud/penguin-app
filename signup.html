@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create an Account - Penguin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #111111;
+      --bg-tertiary: #1a1a1a;
+      --bg-card: #151515;
+      --bg-hover: #1f1f1f;
+      --text-primary: #ffffff;
+      --text-secondary: #a1a1a1;
+      --text-muted: #6b6b6b;
+      --border-color: #262626;
+      --accent-blue: #2563eb;
+      --accent-blue-hover: #1d4ed8;
+      --accent-coral: #e85a4f;
+      --accent-green: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+    }
+
+    .left-panel {
+      width: 50%;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .left-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.12) 0, transparent 2px),
+        radial-gradient(circle at 75% 25%, rgba(255,255,255,0.10) 0, transparent 2px),
+        radial-gradient(circle at 30% 70%, rgba(255,255,255,0.08) 0, transparent 2px),
+        radial-gradient(circle at 80% 60%, rgba(255,255,255,0.10) 0, transparent 2px),
+        radial-gradient(circle at 55% 45%, rgba(255,255,255,0.06) 0, transparent 2px);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .logo {
+      position: relative;
+      z-index: 1;
+      font-size: 24px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 2px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .logo span {
+      color: var(--accent-coral);
+    }
+
+    .left-content {
+      position: relative;
+      z-index: 1;
+      max-width: 460px;
+    }
+
+    .welcome-text {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 42px;
+      color: #ffffff;
+      line-height: 1.25;
+      margin-bottom: 20px;
+      opacity: 0.92;
+    }
+
+    .left-subtext {
+      color: rgba(255,255,255,0.78);
+      font-size: 15px;
+      line-height: 1.7;
+      max-width: 420px;
+    }
+
+    .feature-pills {
+      margin-top: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .feature-pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.86);
+      font-size: 13px;
+    }
+
+    .left-footer {
+      position: relative;
+      z-index: 1;
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      line-height: 1.6;
+      max-width: 420px;
+    }
+
+    .right-panel {
+      width: 50%;
+      background-color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .form-container {
+      width: 100%;
+      max-width: 430px;
+    }
+
+    .form-title {
+      font-size: 30px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 10px;
+    }
+
+    .form-subtitle {
+      font-size: 14px;
+      color: #6b7280;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      color: #4b5563;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #111827;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+    }
+
+    .form-input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.10);
+    }
+
+    .form-input::placeholder {
+      color: #9ca3af;
+    }
+
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #6b7280;
+      padding: 4px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .password-toggle:hover {
+      color: #111827;
+    }
+
+    .helper-text {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 4px;
+      margin-bottom: 22px;
+    }
+
+    .checkbox-row input {
+      margin-top: 3px;
+      accent-color: #2563eb;
+    }
+
+    .checkbox-row label {
+      font-size: 13px;
+      color: #4b5563;
+      line-height: 1.55;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background-color: #2563eb;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+      margin-bottom: 16px;
+    }
+
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .auth-footer {
+      text-align: center;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .auth-footer a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .status-message {
+      display: none;
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .status-message.show {
+      display: block;
+    }
+
+    .status-message.success {
+      background: rgba(34,197,94,0.10);
+      color: #166534;
+      border: 1px solid rgba(34,197,94,0.22);
+    }
+
+    .status-message.error {
+      background: rgba(239,68,68,0.10);
+      color: #991b1b;
+      border: 1px solid rgba(239,68,68,0.18);
+    }
+
+    .field-error {
+      margin-top: 7px;
+      font-size: 12px;
+      color: #dc2626;
+      display: none;
+    }
+
+    .field-error.show {
+      display: block;
+    }
+
+    @media (max-width: 980px) {
+      body {
+        flex-direction: column;
+      }
+
+      .left-panel,
+      .right-panel {
+        width: 100%;
+      }
+
+      .left-panel {
+        min-height: 300px;
+      }
+
+      .welcome-text {
+        font-size: 34px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .left-panel,
+      .right-panel {
+        padding: 24px;
+      }
+
+      .form-title {
+        font-size: 26px;
+      }
+
+      .welcome-text {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="left-panel">
+    <a href="login.html" class="logo">Penguin<span>.</span></a>
+
+    <div class="left-content">
+      <div class="welcome-text">Create an account and step into your communication workspace.</div>
+      <div class="left-subtext">
+        Sign up once, then move into your dashboard where meetings, team chat, schedule, friends, and settings all connect in one flow.
+      </div>
+
+      <div class="feature-pills">
+        <div class="feature-pill">Meetings</div>
+        <div class="feature-pill">Team Chat</div>
+        <div class="feature-pill">Schedule</div>
+        <div class="feature-pill">Friends</div>
+      </div>
+    </div>
+
+    <div class="left-footer">
+      This prototype stores accounts in your browser for demo purposes, so you can create an account, return to login, and sign in like a real app flow.
+    </div>
+  </section>
+
+  <section class="right-panel">
+    <div class="form-container">
+      <div class="form-title">Create Account</div>
+      <div class="form-subtitle">
+        Fill in your details below. After successful signup, you will be redirected to the login page.
+      </div>
+
+      <div id="statusMessage" class="status-message"></div>
+
+      <form id="signupForm" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="fullName">Full Name</label>
+          <input type="text" id="fullName" class="form-input" placeholder="Enter your full name">
+          <div class="field-error" id="nameError">Please enter your full name.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input type="email" id="email" class="form-input" placeholder="Enter your email">
+          <div class="field-error" id="emailError">Please enter a valid email address.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="password-wrapper">
+            <input type="password" id="password" class="form-input" placeholder="Create a password">
+            <button type="button" class="password-toggle" data-target="password">Show</button>
+          </div>
+          <div class="helper-text">Use at least 6 characters for this demo account.</div>
+          <div class="field-error" id="passwordError">Password must be at least 6 characters long.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="confirmPassword">Confirm Password</label>
+          <div class="password-wrapper">
+            <input type="password" id="confirmPassword" class="form-input" placeholder="Re-enter your password">
+            <button type="button" class="password-toggle" data-target="confirmPassword">Show</button>
+          </div>
+          <div class="field-error" id="confirmPasswordError">Passwords do not match.</div>
+        </div>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="agreeTerms">
+          <label for="agreeTerms">
+            I agree to the demo terms and understand this prototype stores account data only in this browser.
+          </label>
+        </div>
+        <div class="field-error" id="termsError" style="margin-top:-12px; margin-bottom:16px;">Please agree before creating your account.</div>
+
+        <button type="submit" class="btn-primary" id="createAccountBtn">Create Account</button>
+      </form>
+
+      <div class="auth-footer">
+        Already have an account?
+        <a href="login.html">Log in</a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const signupForm = document.getElementById('signupForm');
+    const statusMessage = document.getElementById('statusMessage');
+    const createAccountBtn = document.getElementById('createAccountBtn');
+
+    const fullNameInput = document.getElementById('fullName');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const agreeTermsInput = document.getElementById('agreeTerms');
+
+    const errors = {
+      name: document.getElementById('nameError'),
+      email: document.getElementById('emailError'),
+      password: document.getElementById('passwordError'),
+      confirmPassword: document.getElementById('confirmPasswordError'),
+      terms: document.getElementById('termsError')
+    };
+
+    function showStatus(message, type) {
+      statusMessage.textContent = message;
+      statusMessage.className = `status-message show ${type}`;
+    }
+
+    function clearStatus() {
+      statusMessage.className = 'status-message';
+      statusMessage.textContent = '';
+    }
+
+    function clearErrors() {
+      Object.values(errors).forEach(el => el.classList.remove('show'));
+    }
+
+    function validEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function getStoredUsers() {
+      try {
+        return JSON.parse(localStorage.getItem('penguinUsers') || '[]');
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveStoredUsers(users) {
+      localStorage.setItem('penguinUsers', JSON.stringify(users));
+    }
+
+    function validateForm() {
+      clearErrors();
+      clearStatus();
+
+      const fullName = fullNameInput.value.trim();
+      const email = emailInput.value.trim().toLowerCase();
+      const password = passwordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+      const agreed = agreeTermsInput.checked;
+
+      let isValid = true;
+
+      if (!fullName) {
+        errors.name.classList.add('show');
+        isValid = false;
+      }
+
+      if (!validEmail(email)) {
+        errors.email.classList.add('show');
+        isValid = false;
+      }
+
+      if (password.length < 6) {
+        errors.password.classList.add('show');
+        isValid = false;
+      }
+
+      if (confirmPassword !== password || !confirmPassword) {
+        errors.confirmPassword.classList.add('show');
+        isValid = false;
+      }
+
+      if (!agreed) {
+        errors.terms.classList.add('show');
+        isValid = false;
+      }
+
+      const users = getStoredUsers();
+      const exists = users.some(user => user.email === email);
+
+      if (isValid && exists) {
+        showStatus('An account with this email already exists. Please log in instead.', 'error');
+        isValid = false;
+      }
+
+      return isValid;
+    }
+
+    signupForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      if (!validateForm()) return;
+
+      const fullName = fullNameInput.value.trim();
+      const email = emailInput.value.trim().toLowerCase();
+      const password = passwordInput.value;
+
+      const users = getStoredUsers();
+      const newUser = {
+        id: Date.now(),
+        fullName,
+        email,
+        password
+      };
+
+      users.push(newUser);
+      saveStoredUsers(users);
+
+      localStorage.setItem('penguinSignupSuccess', 'Account created successfully. Please log in.');
+
+      createAccountBtn.disabled = true;
+      showStatus('Account created successfully. Redirecting to login...', 'success');
+
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 1200);
+    });
+
+    document.querySelectorAll('.password-toggle').forEach(button => {
+      button.addEventListener('click', () => {
+        const targetId = button.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+
+        if (input.type === 'password') {
+          input.type = 'text';
+          button.textContent = 'Hide';
+        } else {
+          input.type = 'password';
+          button.textContent = 'Show';
+        }
+      });
+    });
+
+    [fullNameInput, emailInput, passwordInput, confirmPasswordInput, agreeTermsInput].forEach(input => {
+      input.addEventListener('input', clearStatus);
+      input.addEventListener('change', clearStatus);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Chat - Penguin.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #151515;
+            --bg-hover: #1f1f1f;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1a1;
+            --text-muted: #6b6b6b;
+            --border-color: #262626;
+            --accent-blue: #2563eb;
+            --accent-blue-hover: #1d4ed8;
+            --accent-coral: #e85a4f;
+            --accent-green: #22c55e;
+            --accent-yellow: #eab308;
+            --accent-purple: #8b5cf6;
+            --accent-red: #ef4444;
+            --accent-orange: #f59e0b;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo-dot {
+            color: var(--accent-coral);
+        }
+
+        .sidebar-nav {
+            padding: 16px 12px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0 12px;
+            margin-bottom: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background-color: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .nav-item-badge {
+            margin-left: auto;
+            background-color: var(--accent-blue);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .user-profile:hover {
+            background-color: var(--bg-hover);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .user-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-green);
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .top-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 32px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-secondary);
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 16px;
+            width: 400px;
+        }
+
+        .search-bar input {
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-bar svg {
+            width: 18px;
+            height: 18px;
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .icon-btn:hover {
+            background-color: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .icon-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 18px;
+            height: 18px;
+            background-color: var(--accent-coral);
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .chat-shell {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            min-height: 0;
+        }
+
+        .chat-list {
+            width: 100%;
+            background: rgba(13, 21, 32, 0.5);
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .chat-list-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .chat-list-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .chat-search {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px 14px;
+        }
+
+        .chat-search svg {
+            width: 18px;
+            height: 18px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .chat-search input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .chat-search input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .chat-tabs {
+            display: flex;
+            padding: 12px 20px;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .chat-tab {
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .chat-tab:hover {
+            background: rgba(255,255,255,0.06);
+            color: #fff;
+        }
+
+        .chat-tab.active {
+            background: rgba(37, 99, 235, 0.18);
+            border-color: rgba(37, 99, 235, 0.28);
+            color: #bfdbfe;
+        }
+
+        .chat-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .chat-item:hover {
+            background: rgba(255,255,255,0.04);
+        }
+
+        .chat-item.active {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.08);
+        }
+
+        .chat-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .chat-avatar-dot {
+            position: absolute;
+            bottom: 1px;
+            right: 1px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            border: 2px solid #111;
+        }
+
+        .chat-meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .chat-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-time {
+            font-size: 11px;
+            color: rgba(255,255,255,0.45);
+            flex-shrink: 0;
+        }
+
+        .chat-preview-text {
+            font-size: 12px;
+            color: rgba(255,255,255,0.55);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-unread {
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: var(--accent-blue);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .chat-main {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            min-height: 0;
+        }
+
+        .conversation-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .conversation-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .conversation-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .conversation-avatar-dot {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            border: 2px solid #111;
+        }
+
+        .conversation-info {
+            min-width: 0;
+        }
+
+        .conversation-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .conversation-status {
+            font-size: 12px;
+            color: rgba(255,255,255,0.55);
+        }
+
+        .conversation-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mini-action-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .mini-action-btn:hover {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+        }
+
+        .mini-action-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0));
+        }
+
+        .date-separator {
+            align-self: center;
+            font-size: 11px;
+            color: rgba(255,255,255,0.45);
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 999px;
+            margin-bottom: 6px;
+        }
+
+        .message-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            max-width: 72%;
+        }
+
+        .message-row.you {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-row.other {
+            align-self: flex-start;
+        }
+
+        .message-bubble {
+            border-radius: 16px;
+            padding: 12px 14px;
+            font-size: 13px;
+            line-height: 1.55;
+            word-break: break-word;
+        }
+
+        .message-row.other .message-bubble {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.9);
+        }
+
+        .message-row.you .message-bubble {
+            background: var(--accent-blue);
+            color: #fff;
+        }
+
+        .message-meta {
+            font-size: 11px;
+            color: rgba(255,255,255,0.45);
+            margin-top: 4px;
+        }
+
+        .composer {
+            padding: 18px 24px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.02);
+        }
+
+        .composer-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .composer-chip {
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.7);
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .composer-chip:hover {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+        }
+
+        .assist-panel {
+            margin-bottom: 14px;
+            display: none;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+        }
+
+        .assist-panel.show {
+            display: block;
+        }
+
+        .assist-row {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .assist-row:last-child {
+            border-bottom: none;
+        }
+
+        .assist-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 6px;
+        }
+
+        .assist-value {
+            font-size: 13px;
+            line-height: 1.55;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .assist-value.muted {
+            color: rgba(255,255,255,0.55);
+        }
+
+        .priority-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            width: fit-content;
+        }
+
+        .priority-pill.normal {
+            background: rgba(34,197,94,0.14);
+            color: #86efac;
+            border: 1px solid rgba(34,197,94,0.2);
+        }
+
+        .priority-pill.important {
+            background: rgba(245,158,11,0.14);
+            color: #fcd34d;
+            border: 1px solid rgba(245,158,11,0.22);
+        }
+
+        .priority-pill.urgent {
+            background: rgba(239,68,68,0.14);
+            color: #fca5a5;
+            border: 1px solid rgba(239,68,68,0.22);
+        }
+
+        .composer-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .composer-input-wrap {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 12px 14px;
+        }
+
+        .composer-input-wrap svg {
+            width: 18px;
+            height: 18px;
+            color: rgba(255,255,255,0.45);
+            flex-shrink: 0;
+        }
+
+        .composer-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: white;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .composer-input::placeholder {
+            color: rgba(255,255,255,0.38);
+        }
+
+        .send-btn,
+        .rewrite-btn {
+            padding: 12px 18px;
+            border-radius: 12px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: 0.2s ease;
+        }
+
+        .send-btn {
+            background: var(--accent-blue);
+        }
+
+        .send-btn:hover {
+            background: var(--accent-blue-hover);
+        }
+
+        .rewrite-btn {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .rewrite-btn:hover {
+            background: rgba(255,255,255,0.12);
+        }
+
+        .empty-state {
+            color: rgba(255,255,255,0.45);
+            font-size: 13px;
+            text-align: center;
+            padding: 22px 10px;
+        }
+
+        @media (max-width: 980px) {
+            .chat-shell {
+                grid-template-columns: 280px 1fr;
+            }
+
+            .search-bar {
+                width: 280px;
+            }
+        }
+
+        @media (max-width: 860px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .chat-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-list {
+                display: none;
+            }
+
+            .top-header {
+                padding: 16px 20px;
+            }
+
+            .search-bar {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .composer-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="dashboard.html" class="logo">
+                Penguin<span class="logo-dot">.</span>
+            </a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="dashboard.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V9.5z"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="team-chat.html" class="nav-item active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Team Chat
+                    <span class="nav-item-badge">4</span>
+                </a>
+                <a href="schedule.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    Schedule
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Workspace</div>
+                <a href="teams.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    Teams
+                </a>
+                <a href="friends.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="8.5" cy="7" r="4"/>
+                        <path d="M20 8v6"/>
+                        <path d="M23 11h-6"/>
+                    </svg>
+                    Friends
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0A1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0A1.65 1.65 0 0 0 20.91 10H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    Settings
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">PE</div>
+                <div class="user-info">
+                    <div class="user-name">Percy</div>
+                    <div class="user-status">
+                        <span class="status-dot"></span>
+                        Online
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="search-bar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="globalSearch" placeholder="Search chats, people, messages...">
+            </div>
+
+            <div class="header-actions">
+                <button class="icon-btn" type="button" aria-label="Notifications">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span class="notification-badge">2</span>
+                </button>
+
+                <button class="icon-btn" type="button" aria-label="New chat" id="newChatBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14"></path>
+                        <path d="M5 12h14"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <section class="chat-shell">
+            <aside class="chat-list">
+                <div class="chat-list-header">
+                    <h2>Messages</h2>
+                    <div class="chat-search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="chatSearch" placeholder="Search chats...">
+                    </div>
+                </div>
+
+                <div class="chat-tabs">
+                    <button class="chat-tab active" data-tab="teams">Teams</button>
+                    <button class="chat-tab" data-tab="direct">Direct</button>
+                    <button class="chat-tab" data-tab="archived">Archived</button>
+                </div>
+
+                <div class="chat-items" id="chatItems"></div>
+            </aside>
+
+            <section class="chat-main">
+                <div class="conversation-header">
+                    <div class="conversation-left">
+                        <div class="conversation-avatar" id="conversationAvatar">
+                            EN
+                            <span class="conversation-avatar-dot" id="conversationAvatarDot"></span>
+                        </div>
+                        <div class="conversation-info">
+                            <div class="conversation-name" id="conversationName">Engineering Team</div>
+                            <div class="conversation-status" id="conversationStatus">6 members • 2 online</div>
+                        </div>
+                    </div>
+
+                    <div class="conversation-actions">
+                        <button class="mini-action-btn" id="callChatBtn" title="Start call">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M23 7l-7 5 7 5V7z"></path>
+                                <rect x="1" y="5" width="15" height="14" rx="2"></rect>
+                            </svg>
+                        </button>
+                        <button class="mini-action-btn" id="pinChatBtn" title="Pin chat">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 17v5"></path>
+                                <path d="M5 3h14l-4 6v4l-6 2V9L5 3z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="messages" id="messages"></div>
+
+                <div class="composer">
+                    <div class="composer-toolbar">
+                        <button class="composer-chip" data-insert="Meeting link copied.">Quick Reply</button>
+                        <button class="composer-chip" data-insert="I will review this and update soon.">Follow-up</button>
+                        <button class="composer-chip" data-insert="Let’s move this to a call.">Call Suggestion</button>
+                    </div>
+
+                    <div class="assist-panel" id="assistPanel">
+                        <div class="assist-row">
+                            <div class="assist-label">Priority</div>
+                            <div class="assist-value">
+                                <span class="priority-pill normal" id="priorityPill">Normal</span>
+                            </div>
+                        </div>
+                        <div class="assist-row">
+                            <div class="assist-label">Clarity Check</div>
+                            <div class="assist-value muted" id="clarityValue">No clarity issue detected.</div>
+                        </div>
+                        <div class="assist-row">
+                            <div class="assist-label">Professional Rewrite</div>
+                            <div class="assist-value muted" id="rewriteValue">No rewrite suggestion yet.</div>
+                        </div>
+                    </div>
+
+                    <div class="composer-row">
+                        <div class="composer-input-wrap">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <input type="text" class="composer-input" id="messageInput" placeholder="Type your message.">
+                        </div>
+                        <button class="rewrite-btn" id="rewriteBtn" type="button">Use Suggestion</button>
+                        <button class="send-btn" id="sendBtn" type="button">Send</button>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <script>
+        const chats = [
+            {
+                id: 1,
+                tab: 'teams',
+                name: 'Engineering Team',
+                avatar: 'EN',
+                status: '6 members • 2 online',
+                time: '2m',
+                unread: 3,
+                preview: 'Please check the new meeting room flow before the demo.',
+                pinned: false,
+                online: true,
+                messages: [
+                    { sender: 'other', text: 'Morning team. Please review the create/join flow before the presentation.', time: '09:10 AM' },
+                    { sender: 'you', text: 'I updated the dashboard and the call-room flow already.', time: '09:13 AM' },
+                    { sender: 'other', text: 'Great. Also test the two-device connection once more.', time: '09:15 AM' }
+                ]
+            },
+            {
+                id: 2,
+                tab: 'teams',
+                name: 'Design Review',
+                avatar: 'DR',
+                status: '4 members • Reviewing screens',
+                time: '12m',
+                unread: 1,
+                preview: 'Can we reduce the overlap in the call room labels?',
+                pinned: false,
+                online: true,
+                messages: [
+                    { sender: 'other', text: 'The gesture label overlaps the participant name.', time: '08:52 AM' },
+                    { sender: 'you', text: 'I moved it lower with more white space already.', time: '08:55 AM' }
+                ]
+            },
+            {
+                id: 3,
+                tab: 'direct',
+                name: 'Ava',
+                avatar: 'AV',
+                status: 'Online now',
+                time: '25m',
+                unread: 0,
+                preview: 'Send me the final code for team chat when ready.',
+                pinned: false,
+                online: true,
+                messages: [
+                    { sender: 'other', text: 'Send me the final code for team chat when ready.', time: '08:30 AM' },
+                    { sender: 'you', text: 'I am cleaning the layout first, then I will send it.', time: '08:33 AM' }
+                ]
+            },
+            {
+                id: 4,
+                tab: 'direct',
+                name: 'Liam',
+                avatar: 'LI',
+                status: 'Last seen 1 hour ago',
+                time: '1h',
+                unread: 2,
+                preview: 'The meeting ID and password are working now.',
+                pinned: false,
+                online: false,
+                messages: [
+                    { sender: 'other', text: 'The meeting ID and password are working now.', time: '07:18 AM' },
+                    { sender: 'you', text: 'Nice. Next we standardize the side pages.', time: '07:26 AM' }
+                ]
+            },
+            {
+                id: 5,
+                tab: 'archived',
+                name: 'Old Project Archive',
+                avatar: 'AR',
+                status: 'Archived channel',
+                time: 'Yesterday',
+                unread: 0,
+                preview: 'Previous semester references and notes.',
+                pinned: false,
+                online: false,
+                messages: [
+                    { sender: 'other', text: 'Previous semester references and notes are stored here.', time: 'Yesterday' }
+                ]
+            }
+        ];
+
+        let currentTab = 'teams';
+        let currentChatId = 1;
+        let currentSuggestion = '';
+
+        const chatItemsEl = document.getElementById('chatItems');
+        const messagesEl = document.getElementById('messages');
+        const chatSearchEl = document.getElementById('chatSearch');
+        const messageInputEl = document.getElementById('messageInput');
+        const assistPanelEl = document.getElementById('assistPanel');
+        const clarityValueEl = document.getElementById('clarityValue');
+        const rewriteValueEl = document.getElementById('rewriteValue');
+        const priorityPillEl = document.getElementById('priorityPill');
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function normalizeMessage(message) {
+            return message.trim().replace(/\s+/g, ' ');
+        }
+
+        function detectPriority(message) {
+            const lower = message.toLowerCase();
+
+            if (
+                lower.includes('asap') ||
+                lower.includes('urgent') ||
+                lower.includes('immediately') ||
+                lower.includes('right now')
+            ) {
+                return { label: 'Urgent', className: 'urgent' };
+            }
+
+            if (
+                lower.includes('important') ||
+                lower.includes('deadline') ||
+                lower.includes('today') ||
+                lower.includes('priority')
+            ) {
+                return { label: 'Important', className: 'important' };
+            }
+
+            return { label: 'Normal', className: 'normal' };
+        }
+
+        function detectClarityIssue(message) {
+            const lower = message.toLowerCase();
+            const vagueWords = ['later', 'soon', 'maybe', 'something', 'somehow', 'idk', 'whenever', 'stuff'];
+
+            for (const word of vagueWords) {
+                if (lower.includes(word)) {
+                    return `Possible unclear wording detected because of "${word}". Try being more specific.`;
+                }
+            }
+
+            if (lower.length > 0 && !/[0-9]/.test(lower) && (lower.includes('do it') || lower.includes('send it'))) {
+                return 'This instruction may be unclear. Consider adding a time, file name, or exact task.';
+            }
+
+            return '';
+        }
+
+        function rewriteProfessionally(message) {
+            let rewritten = `Could you please ${message.trim()}`;
+
+            const replacements = [
+                { from: /\b(send me\b)/gi, to: 'send' },
+                { from: /\bbro\b/gi, to: '' },
+                { from: /\bdude\b/gi, to: '' },
+                { from: /\bok\b/gi, to: 'alright' },
+                { from: /\bnow\b/gi, to: 'as soon as possible' },
+                { from: /\bu\b/gi, to: 'you' },
+                { from: /\bpls\b/gi, to: 'please' },
+                { from: /\bthx\b/gi, to: 'thank you' }
+            ];
+
+            rewritten = message.trim();
+            replacements.forEach(rule => {
+                rewritten = rewritten.replace(rule.from, rule.to);
+            });
+
+            rewritten = normalizeMessage(rewritten);
+
+            if (!rewritten) return '';
+
+            if (!/^could you please/i.test(rewritten) && !/^please/i.test(rewritten)) {
+                rewritten = `Could you please ${rewritten}`;
+            }
+
+            rewritten = rewritten.replace(/\s+,/g, ',').replace(/\s+\./g, '.');
+            rewritten = rewritten.charAt(0).toUpperCase() + rewritten.slice(1);
+
+            if (!/[.!?]$/.test(rewritten)) {
+                rewritten += '.';
+            }
+
+            return rewritten;
+        }
+
+        function updateComposerAssist() {
+            const text = normalizeMessage(messageInputEl.value);
+
+            if (!text) {
+                assistPanelEl.classList.remove('show');
+                clarityValueEl.textContent = 'No clarity issue detected.';
+                clarityValueEl.className = 'assist-value muted';
+                rewriteValueEl.textContent = 'No rewrite suggestion yet.';
+                rewriteValueEl.className = 'assist-value muted';
+                priorityPillEl.textContent = 'Normal';
+                priorityPillEl.className = 'priority-pill normal';
+                currentSuggestion = '';
+                return;
+            }
+
+            assistPanelEl.classList.add('show');
+
+            const priority = detectPriority(text);
+            priorityPillEl.textContent = priority.label;
+            priorityPillEl.className = `priority-pill ${priority.className}`;
+
+            const clarityIssue = detectClarityIssue(text);
+            if (clarityIssue) {
+                clarityValueEl.textContent = clarityIssue;
+                clarityValueEl.className = 'assist-value';
+            } else {
+                clarityValueEl.textContent = 'No clarity issue detected.';
+                clarityValueEl.className = 'assist-value muted';
+            }
+
+            const rewritten = rewriteProfessionally(text);
+            if (rewritten && rewritten !== text) {
+                rewriteValueEl.textContent = rewritten;
+                rewriteValueEl.className = 'assist-value';
+                currentSuggestion = rewritten;
+            } else {
+                rewriteValueEl.textContent = 'Your message already looks professional.';
+                rewriteValueEl.className = 'assist-value muted';
+                currentSuggestion = '';
+            }
+        }
+
+        function getFilteredChats() {
+            const query = chatSearchEl.value.trim().toLowerCase();
+            return chats.filter(chat => {
+                const matchesTab = chat.tab === currentTab;
+                const matchesQuery = !query || chat.name.toLowerCase().includes(query) || chat.preview.toLowerCase().includes(query);
+                return matchesTab && matchesQuery;
+            });
+        }
+
+        function renderChatList() {
+            const filtered = getFilteredChats();
+
+            if (!filtered.length) {
+                chatItemsEl.innerHTML = `<div class="empty-state">No chats found in this tab.</div>`;
+                return;
+            }
+
+            chatItemsEl.innerHTML = filtered.map(chat => `
+                <div class="chat-item ${chat.id === currentChatId ? 'active' : ''}" data-id="${chat.id}">
+                    <div class="chat-avatar">
+                        ${escapeHtml(chat.avatar)}
+                        ${chat.online ? '<span class="chat-avatar-dot"></span>' : ''}
+                    </div>
+                    <div class="chat-meta">
+                        <div class="chat-top-row">
+                            <div class="chat-name">${escapeHtml(chat.name)}</div>
+                            <div class="chat-time">${escapeHtml(chat.time)}</div>
+                        </div>
+                        <div class="chat-preview-text">${escapeHtml(chat.preview)}</div>
+                    </div>
+                    ${chat.unread > 0 ? `<div class="chat-unread">${chat.unread}</div>` : ''}
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    currentChatId = Number(item.dataset.id);
+                    const selectedChat = chats.find(chat => chat.id === currentChatId);
+                    if (selectedChat) selectedChat.unread = 0;
+                    renderChatList();
+                    renderConversation();
+                });
+            });
+        }
+
+        function renderConversation() {
+            const chat = chats.find(c => c.id === currentChatId);
+            if (!chat) return;
+
+            document.getElementById('conversationName').textContent = chat.name;
+            document.getElementById('conversationStatus').textContent = chat.status;
+
+            const initials = chat.name.split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase();
+            document.getElementById('conversationAvatar').childNodes[0].nodeValue = initials;
+            document.getElementById('conversationAvatarDot').style.display = chat.online ? 'block' : 'none';
+
+            const messageHtml = [
+                `<div class="date-separator">Today</div>`,
+                ...chat.messages.map(msg => `
+                    <div class="message-row ${msg.sender === 'you' ? 'you' : 'other'}">
+                        <div>
+                            <div class="message-bubble">${escapeHtml(msg.text)}</div>
+                            <div class="message-meta">${escapeHtml(msg.time)}</div>
+                        </div>
+                    </div>
+                `)
+            ].join('');
+
+            messagesEl.innerHTML = messageHtml;
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        function sendMessage() {
+            const text = normalizeMessage(messageInputEl.value);
+            if (!text) return;
+
+            const chat = chats.find(c => c.id === currentChatId);
+            if (!chat) return;
+
+            const now = new Date();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const priority = detectPriority(text);
+
+            let finalText = text;
+            if (priority.label !== 'Normal') {
+                finalText = `[${priority.label}] ${text}`;
+            }
+
+            chat.messages.push({
+                sender: 'you',
+                text: finalText,
+                time
+            });
+
+            chat.preview = finalText;
+            chat.time = 'Now';
+
+            messageInputEl.value = '';
+            currentSuggestion = '';
+            updateComposerAssist();
+            renderChatList();
+            renderConversation();
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            const availableChats = chats.filter(chat => chat.tab === currentTab);
+            currentChatId = availableChats.length ? availableChats[0].id : null;
+
+            document.querySelectorAll('.chat-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tab);
+            });
+
+            renderChatList();
+            renderConversation();
+        }
+
+        document.querySelectorAll('.chat-tab').forEach(btn => {
+            btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+        });
+
+        chatSearchEl.addEventListener('input', renderChatList);
+
+        messageInputEl.addEventListener('input', updateComposerAssist);
+
+        messageInputEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+
+        document.getElementById('rewriteBtn').addEventListener('click', () => {
+            if (!currentSuggestion) {
+                updateComposerAssist();
+                return;
+            }
+            messageInputEl.value = currentSuggestion;
+            updateComposerAssist();
+            messageInputEl.focus();
+        });
+
+        document.querySelectorAll('.composer-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                messageInputEl.value = chip.dataset.insert;
+                updateComposerAssist();
+                messageInputEl.focus();
+            });
+        });
+
+        document.getElementById('callChatBtn').addEventListener('click', () => {
+            window.location.href = 'join-meeting.html';
+        });
+
+        document.getElementById('pinChatBtn').addEventListener('click', () => {
+            const chat = chats.find(c => c.id === currentChatId);
+            if (!chat) return;
+            chat.pinned = !chat.pinned;
+            alert(chat.pinned ? 'Chat pinned.' : 'Chat unpinned.');
+        });
+
+        document.getElementById('newChatBtn').addEventListener('click', () => {
+            alert('New chat action placeholder.');
+        });
+
+        renderChatList();
+        renderConversation();
+        updateComposerAssist();
+    </script>
+</body>
+</html>

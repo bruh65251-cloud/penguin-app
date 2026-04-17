@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penguin. - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #151515;
+            --bg-hover: #1f1f1f;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1a1;
+            --text-muted: #6b6b6b;
+            --border-color: #262626;
+            --accent-blue: #2563eb;
+            --accent-blue-hover: #1d4ed8;
+            --accent-coral: #e85a4f;
+            --accent-green: #22c55e;
+            --accent-yellow: #eab308;
+            --accent-purple: #8b5cf6;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo-dot {
+            color: var(--accent-coral);
+        }
+
+        .sidebar-nav {
+            padding: 16px 12px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0 12px;
+            margin-bottom: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background-color: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .nav-item-badge {
+            margin-left: auto;
+            background-color: var(--accent-blue);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .user-profile:hover {
+            background-color: var(--bg-hover);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .user-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-green);
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .top-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 32px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-secondary);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 16px;
+            width: 400px;
+        }
+
+        .search-bar input {
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-bar svg {
+            width: 18px;
+            height: 18px;
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .icon-btn:hover {
+            background-color: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .icon-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 18px;
+            height: 18px;
+            background-color: var(--accent-coral);
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .dashboard {
+            padding: 32px;
+            flex: 1;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, rgba(37,99,235,0.16), rgba(139,92,246,0.08));
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 28px;
+        }
+
+        .hero-title {
+            font-size: 30px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 10px;
+        }
+
+        .hero-subtitle {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.6;
+            max-width: 720px;
+        }
+
+        .hero-actions {
+            margin-top: 22px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .primary-btn,
+        .secondary-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .primary-btn {
+            background: var(--accent-blue);
+            color: #fff;
+        }
+
+        .primary-btn:hover {
+            background: var(--accent-blue-hover);
+        }
+
+        .secondary-btn {
+            background: rgba(255,255,255,0.06);
+            color: var(--text-primary);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .secondary-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .mini-stats {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 20px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .stat-note {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .section {
+            margin-bottom: 28px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .section-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .section-link:hover {
+            color: var(--text-primary);
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .action-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 22px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+            min-height: 170px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(37,99,235,0.45);
+            background: #191919;
+        }
+
+        .action-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+
+        .action-icon svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .icon-blue {
+            background: rgba(37,99,235,0.18);
+            color: #60a5fa;
+        }
+
+        .icon-green {
+            background: rgba(34,197,94,0.18);
+            color: #4ade80;
+        }
+
+        .icon-purple {
+            background: rgba(139,92,246,0.18);
+            color: #c4b5fd;
+        }
+
+        .action-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .action-desc {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 24px;
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 22px;
+        }
+
+        .meeting-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .meeting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+
+        .meeting-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .meeting-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .meeting-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .meeting-tag {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(37,99,235,0.16);
+            color: #93c5fd;
+        }
+
+        .tips-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tip-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .tip-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .tip-bullet {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(37,99,235,0.16);
+            color: #93c5fd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .tip-text {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        @media (max-width: 1180px) {
+            .hero,
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 860px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .top-header {
+                padding: 16px 20px;
+                gap: 12px;
+            }
+
+            .search-bar {
+                width: 100%;
+                max-width: 360px;
+            }
+
+            .dashboard {
+                padding: 20px;
+            }
+
+            .hero-title {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .top-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-actions {
+                justify-content: flex-end;
+            }
+
+            .search-bar {
+                max-width: none;
+                width: 100%;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+            }
+
+            .primary-btn,
+            .secondary-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="dashboard.html" class="logo">
+                Penguin<span class="logo-dot">.</span>
+            </a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="dashboard.html" class="nav-item active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V9.5z"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="team-chat.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Team Chat
+                    <span class="nav-item-badge">4</span>
+                </a>
+                <a href="schedule.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    Schedule
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Workspace</div>
+                <a href="teams.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    Teams
+                </a>
+                <a href="friends.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="8.5" cy="7" r="4"/>
+                        <path d="M20 8v6"/>
+                        <path d="M23 11h-6"/>
+                    </svg>
+                    Friends
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0A1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0A1.65 1.65 0 0 0 20.91 10H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    Settings
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">PE</div>
+                <div class="user-info">
+                    <div class="user-name">Percy</div>
+                    <div class="user-status">
+                        <span class="status-dot"></span>
+                        Online
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="search-bar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" placeholder="Search meetings, teams, chats...">
+            </div>
+
+            <div class="header-actions">
+                <button class="icon-btn" type="button" aria-label="Notifications">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span class="notification-badge">3</span>
+                </button>
+
+                <button class="icon-btn" type="button" aria-label="Messages">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <section class="dashboard">
+            <div class="hero">
+                <div class="hero-card">
+                    <div class="hero-title">Meet, translate, and collaborate in one workspace.</div>
+                    <div class="hero-subtitle">
+                        Start a meeting, join with a meeting code, and continue into the call room where live communication support such as AI translation and gesture recognition can be used during the conversation.
+                    </div>
+                    <div class="hero-actions">
+                        <a href="create-meeting.html" class="primary-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14"/>
+                                <path d="M5 12h14"/>
+                            </svg>
+                            Create Meeting
+                        </a>
+                        <a href="join-meeting.html" class="secondary-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                                <polyline points="10 17 15 12 10 7"/>
+                                <line x1="15" y1="12" x2="3" y2="12"/>
+                            </svg>
+                            Join Meeting
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mini-stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Today</div>
+                        <div class="stat-value">3 Meetings</div>
+                        <div class="stat-note">You have one active schedule this afternoon.</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Assistive Features</div>
+                        <div class="stat-value">Ready</div>
+                        <div class="stat-note">Translation and gesture tools will appear inside the call room.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">Quick Actions</div>
+                    <a href="schedule.html" class="section-link">View Schedule</a>
+                </div>
+
+                <div class="quick-actions">
+                    <a href="create-meeting.html" class="action-card">
+                        <div>
+                            <div class="action-icon icon-blue">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="5" width="15" height="14" rx="2"></rect>
+                                    <path d="M21 7l-5 4 5 4V7z"></path>
+                                </svg>
+                            </div>
+                            <div class="action-title">Create Meeting</div>
+                            <div class="action-desc">
+                                Set up a meeting room, preview your camera, generate a meeting ID and password, then start the call.
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="join-meeting.html" class="action-card">
+                        <div>
+                            <div class="action-icon icon-green">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                                    <polyline points="10 17 15 12 10 7"/>
+                                    <line x1="15" y1="12" x2="3" y2="12"/>
+                                </svg>
+                            </div>
+                            <div class="action-title">Join Meeting</div>
+                            <div class="action-desc">
+                                Enter the meeting ID and password first, then move into the live call room to communicate.
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="schedule.html" class="action-card">
+                        <div>
+                            <div class="action-icon icon-purple">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </div>
+                            <div class="action-title">Schedule</div>
+                            <div class="action-desc">
+                                Organize upcoming meetings, review plans, and keep your communication flow prepared.
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="two-col">
+                <div class="panel">
+                    <div class="section-header">
+                        <div class="section-title">Recent Meetings</div>
+                        <a href="join-meeting.html" class="section-link">Join Another</a>
+                    </div>
+
+                    <div class="meeting-list">
+                        <div class="meeting-item">
+                            <div class="meeting-left">
+                                <div class="meeting-name">Team Weekly Standup</div>
+                                <div class="meeting-meta">Meeting ID: 856-432-9087 • Yesterday</div>
+                            </div>
+                            <div class="meeting-tag">Recent</div>
+                        </div>
+
+                        <div class="meeting-item">
+                            <div class="meeting-left">
+                                <div class="meeting-name">Design Review</div>
+                                <div class="meeting-meta">Meeting ID: 742-918-3654 • 2 days ago</div>
+                            </div>
+                            <div class="meeting-tag">Review</div>
+                        </div>
+
+                        <div class="meeting-item">
+                            <div class="meeting-left">
+                                <div class="meeting-name">Client Presentation</div>
+                                <div class="meeting-meta">Meeting ID: 391-567-2048 • Last week</div>
+                            </div>
+                            <div class="meeting-tag">Client</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="section-header">
+                        <div class="section-title">How the flow works</div>
+                    </div>
+
+                    <div class="tips-list">
+                        <div class="tip-row">
+                            <div class="tip-bullet">1</div>
+                            <div class="tip-text">Create Meeting opens the setup page where the host previews the camera and generates the meeting details.</div>
+                        </div>
+                        <div class="tip-row">
+                            <div class="tip-bullet">2</div>
+                            <div class="tip-text">Join Meeting opens the guest setup page where the user enters the meeting ID and password before entering the call.</div>
+                        </div>
+                        <div class="tip-row">
+                            <div class="tip-bullet">3</div>
+                            <div class="tip-text">Both users move into the call room, where real-time communication happens and assistive tools can be turned on during the meeting.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

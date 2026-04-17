@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Meeting - Penguin.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #151515;
+            --bg-hover: #1f1f1f;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1a1;
+            --text-muted: #6b6b6b;
+            --border-color: #262626;
+            --accent-blue: #2563eb;
+            --accent-blue-hover: #1d4ed8;
+            --accent-coral: #e85a4f;
+            --accent-green: #22c55e;
+            --accent-yellow: #eab308;
+            --accent-purple: #8b5cf6;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 40px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 2px;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--accent-coral);
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .back-btn:hover {
+            color: #ffffff;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-time {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .main-content {
+            display: flex;
+            padding: 40px;
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .preview-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .preview-title {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .camera-preview {
+            background: #1a1a2e;
+            border-radius: 16px;
+            aspect-ratio: 16 / 9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .camera-preview.camera-on {
+            background: linear-gradient(135deg, #1a2744 0%, #0d1520 100%);
+        }
+
+        .camera-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .camera-off-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .camera-off-icon {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .camera-off-icon svg {
+            width: 40px;
+            height: 40px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .camera-off-text {
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 14px;
+            line-height: 1.5;
+            max-width: 320px;
+        }
+
+        .preview-name-tag {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 3;
+        }
+
+        .mic-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent-green);
+        }
+
+        .mic-status-dot.muted {
+            background: var(--danger);
+        }
+
+        .preview-controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .control-btn-wrapper {
+            position: relative;
+        }
+
+        .control-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            position: relative;
+            background: rgba(255,255,255,0.1);
+            color: #ffffff;
+        }
+
+        .control-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .control-btn.active:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .control-btn.inactive {
+            background: var(--danger);
+            color: #ffffff;
+        }
+
+        .control-btn.inactive:hover {
+            background: var(--danger-hover);
+        }
+
+        .control-btn-label {
+            position: absolute;
+            bottom: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            white-space: nowrap;
+        }
+
+        .host-info-card,
+        .meeting-card,
+        .tips-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .host-info-card h3,
+        .meeting-card h2,
+        .tips-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 18px;
+        }
+
+        .meeting-section {
+            width: 420px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.72);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 14px 16px;
+            color: #ffffff;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .readonly-input {
+            padding-right: 44px;
+        }
+
+        .input-with-action {
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .copy-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .info-note {
+            margin-top: 10px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.5;
+        }
+
+        .meeting-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-blue-hover));
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(37,99,235,0.22);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.08);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.14);
+        }
+
+        .tips-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tip-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: rgba(255,255,255,0.66);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .tip-item svg {
+            width: 16px;
+            height: 16px;
+            color: var(--accent-green);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .pill-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.75);
+            font-size: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .pill-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+        }
+
+        @media (max-width: 1100px) {
+            .main-content {
+                flex-direction: column;
+                padding: 24px;
+            }
+
+            .meeting-section {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .header {
+                padding: 16px 20px;
+            }
+
+            .header-left {
+                gap: 18px;
+            }
+
+            .header-time {
+                display: none;
+            }
+
+            .main-content {
+                gap: 24px;
+            }
+
+            .meeting-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="dashboard.html" class="logo">Penguin<span>.</span></a>
+            <a href="dashboard.html" class="back-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5"></path>
+                    <path d="M12 19l-7-7 7-7"></path>
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+
+        <div class="header-right">
+            <div class="header-time" id="headerTime">--:--</div>
+            <div class="user-avatar">PE</div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="preview-section">
+            <div>
+                <div class="preview-title">Host Setup</div>
+                <h1 style="font-size: 28px; margin-top: 6px; margin-bottom: 10px;">Create a Meeting</h1>
+                <p style="color: rgba(255,255,255,0.62); font-size: 14px; line-height: 1.6; max-width: 680px;">
+                    Preview your camera and microphone first, then generate a meeting ID, password, and join link.
+                    After that, start the meeting and move to the live call room.
+                </p>
+            </div>
+
+            <div class="camera-preview" id="cameraPreviewBox">
+                <div class="camera-off-state" id="cameraOffState">
+                    <div class="camera-off-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 7l-7 5 7 5V7z"></path>
+                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                        </svg>
+                    </div>
+                    <div class="camera-off-text">
+                        Camera preview is off. Turn on your camera to check your framing before starting the meeting.
+                    </div>
+                </div>
+
+                <video id="videoPreview" autoplay muted playsinline></video>
+
+                <div class="preview-name-tag">
+                    <div class="mic-status-dot" id="micStatusDot"></div>
+                    <span id="hostNameTag">Percy (Host)</span>
+                </div>
+            </div>
+
+            <div class="preview-controls">
+                <div class="control-btn-wrapper">
+                    <button class="control-btn active" id="micBtn" onclick="toggleMic()">
+                        <svg id="micIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <line x1="12" y1="19" x2="12" y2="23"></line>
+                            <line x1="8" y1="23" x2="16" y2="23"></line>
+                        </svg>
+                        <div class="control-btn-label">Mic</div>
+                    </button>
+                </div>
+
+                <div class="control-btn-wrapper">
+                    <button class="control-btn" id="cameraBtn" onclick="toggleCamera()">
+                        <svg id="cameraIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 7l-7 5 7 5V7z"></path>
+                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                        </svg>
+                        <div class="control-btn-label">Camera</div>
+                    </button>
+                </div>
+
+                <div class="control-btn-wrapper">
+                    <button class="control-btn active" id="speakerBtn" onclick="toggleSpeaker()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        </svg>
+                        <div class="control-btn-label">Speaker</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="host-info-card">
+                <h3>Host Information</h3>
+
+                <div class="form-group">
+                    <label class="form-label">Host Display Name</label>
+                    <input type="text" class="form-input" id="hostDisplayName" value="Percy" placeholder="Enter host name">
+                </div>
+
+                <div class="pill-row">
+                    <div class="pill"><span class="pill-dot"></span> Camera preview before call</div>
+                    <div class="pill"><span class="pill-dot"></span> Meeting details ready to share</div>
+                    <div class="pill"><span class="pill-dot"></span> Call room opens after Start Meeting</div>
+                </div>
+            </div>
+        </section>
+
+        <aside class="meeting-section">
+            <div class="meeting-card">
+                <h2>Meeting Details</h2>
+
+                <div class="form-group">
+                    <label class="form-label">Meeting ID</label>
+                    <div class="input-with-action">
+                        <input type="text" class="form-input readonly-input" id="generatedMeetingId" readonly>
+                        <button class="copy-btn" type="button" onclick="copyField('generatedMeetingId')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Meeting Password</label>
+                    <div class="input-with-action">
+                        <input type="text" class="form-input readonly-input" id="generatedPassword" readonly>
+                        <button class="copy-btn" type="button" onclick="copyField('generatedPassword')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Join Link</label>
+                    <div class="input-with-action">
+                        <input type="text" class="form-input readonly-input" id="generatedJoinLink" readonly>
+                        <button class="copy-btn" type="button" onclick="copyField('generatedJoinLink')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="info-note">
+                        Share this link, or give the other device the Meeting ID and Password to join from the Join Meeting page.
+                    </div>
+                </div>
+
+                <div class="meeting-actions">
+                    <button class="btn btn-secondary" type="button" onclick="regenerateMeetingData()">Regenerate</button>
+                    <button class="btn btn-primary" type="button" onclick="startMeeting()">Start Meeting</button>
+                </div>
+            </div>
+
+            <div class="tips-card">
+                <h3>Before you start</h3>
+                <div class="tips-list">
+                    <div class="tip-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Turn on the camera once to make sure the host preview is working correctly.</span>
+                    </div>
+
+                    <div class="tip-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Copy the meeting details and send them to the second device before entering the call room.</span>
+                    </div>
+
+                    <div class="tip-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>The AI translation and gesture tools will appear inside the actual call page, not here.</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        let micEnabled = true;
+        let cameraEnabled = false;
+        let speakerEnabled = true;
+        let stream = null;
+        let createdRoomId = '';
+        let createdPassword = '';
+
+        function updateHeaderTime() {
+            const now = new Date();
+            const formatted = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('headerTime').textContent = formatted;
+        }
+
+        function randomCode(length) {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function generateMeetingData() {
+            createdRoomId = 'RM-' + randomCode(6);
+            createdPassword = randomCode(4);
+
+            const joinPath = window.location.pathname.replace(/create-meeting\.html$/i, 'join-meeting.html');
+            const origin = window.location.origin || '';
+            const joinLink = `${origin}${joinPath}?room=${encodeURIComponent(createdRoomId)}&pwd=${encodeURIComponent(createdPassword)}`;
+
+            document.getElementById('generatedMeetingId').value = createdRoomId;
+            document.getElementById('generatedPassword').value = createdPassword;
+            document.getElementById('generatedJoinLink').value = joinLink;
+        }
+
+        function regenerateMeetingData() {
+            generateMeetingData();
+        }
+
+        async function copyField(id) {
+            const value = document.getElementById(id).value;
+            try {
+                await navigator.clipboard.writeText(value);
+                alert('Copied to clipboard');
+            } catch (err) {
+                alert('Unable to copy automatically. Please copy manually.');
+            }
+        }
+
+        function toggleMic() {
+            micEnabled = !micEnabled;
+            const btn = document.getElementById('micBtn');
+            const dot = document.getElementById('micStatusDot');
+
+            if (micEnabled) {
+                btn.classList.remove('inactive');
+                btn.classList.add('active');
+                dot.classList.remove('muted');
+            } else {
+                btn.classList.remove('active');
+                btn.classList.add('inactive');
+                dot.classList.add('muted');
+            }
+
+            if (stream) {
+                stream.getAudioTracks().forEach(track => {
+                    track.enabled = micEnabled;
+                });
+            }
+        }
+
+        async function toggleCamera() {
+            const btn = document.getElementById('cameraBtn');
+            const previewBox = document.getElementById('cameraPreviewBox');
+            const video = document.getElementById('videoPreview');
+            const offState = document.getElementById('cameraOffState');
+
+            cameraEnabled = !cameraEnabled;
+
+            if (cameraEnabled) {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: micEnabled
+                    });
+
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    offState.style.display = 'none';
+                    previewBox.classList.add('camera-on');
+                    btn.classList.add('active');
+                } catch (err) {
+                    console.error(err);
+                    cameraEnabled = false;
+                    alert('Unable to access camera. Please check your camera permission.');
+                }
+            } else {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    stream = null;
+                }
+
+                video.srcObject = null;
+                video.style.display = 'none';
+                offState.style.display = 'flex';
+                previewBox.classList.remove('camera-on');
+                btn.classList.remove('active');
+            }
+        }
+
+        function toggleSpeaker() {
+            speakerEnabled = !speakerEnabled;
+            const btn = document.getElementById('speakerBtn');
+
+            if (speakerEnabled) {
+                btn.classList.remove('inactive');
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+                btn.classList.add('inactive');
+            }
+        }
+
+        function startMeeting() {
+            const hostName = document.getElementById('hostDisplayName').value.trim();
+
+            if (!hostName) {
+                alert('Please enter your host display name.');
+                return;
+            }
+
+            if (!createdRoomId || !createdPassword) {
+                generateMeetingData();
+            }
+
+            const url = `call-room.html?role=host&room=${encodeURIComponent(createdRoomId)}&pwd=${encodeURIComponent(createdPassword)}&name=${encodeURIComponent(hostName)}`;
+            window.location.href = url;
+        }
+
+        function updateHostNameTag() {
+            const name = document.getElementById('hostDisplayName').value.trim() || 'Host';
+            document.getElementById('hostNameTag').textContent = `${name} (Host)`;
+        }
+
+        document.getElementById('hostDisplayName').addEventListener('input', updateHostNameTag);
+
+        window.addEventListener('load', () => {
+            updateHeaderTime();
+            setInterval(updateHeaderTime, 1000 * 30);
+            generateMeetingData();
+            updateHostNameTag();
+        });
+    </script>
+</body>
+</html>
