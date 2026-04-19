@@ -295,18 +295,16 @@
             margin-bottom: 6px;
         }
 
-        .subtitle-original {
-            font-size: 14px;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 4px;
-            line-height: 1.5;
-        }
-
         .subtitle-translated {
             font-size: 13px;
             color: #93c5fd;
-            line-height: 1.5;
+            line-height: 1.6;
+        }
+
+        .subtitle-translated.only-translation {
+            font-size: 15px;
+            font-weight: 600;
+            color: #ffffff;
         }
 
         .gesture-badge {
@@ -550,13 +548,19 @@
                 display: none;
             }
 
+            .main-layout {
+                height: auto;
+                min-height: calc(100vh - 76px);
+            }
+
             .call-stage {
                 padding: 12px;
+                overflow: visible;
             }
 
             .video-stage {
-                height: auto;
-                min-height: 52vh;
+                height: 58vh;
+                min-height: 420px;
             }
 
             .local-video {
@@ -588,7 +592,23 @@
         }
         @media (max-width: 520px) {
             body {
-                overflow: auto;
+                overflow-x: hidden;
+                overflow-y: auto;
+            }
+
+            .header {
+                height: auto;
+                min-height: 64px;
+                padding: 12px;
+                align-items: flex-start;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+            .header-left,
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
             }
 
             .header-right {
@@ -600,18 +620,29 @@
                 font-size: 11px;
             }
 
+            .main-layout {
+                display: flex;
+                flex-direction: column;
+                height: auto;
+                min-height: calc(100vh - 64px);
+            }
+
             .call-stage {
                 padding: 8px;
+                overflow: visible;
             }
 
             .video-stage {
-                min-height: 48vh;
+                height: 56vh;
+                min-height: 360px;
                 border-radius: 14px;
             }
 
             .local-video {
                 width: 108px;
                 height: 76px;
+                right: 8px;
+                top: 8px;
             }
 
             .live-subtitle {
@@ -621,16 +652,22 @@
                 padding: 10px 12px;
             }
 
-            .subtitle-original {
+            .subtitle-translated {
                 font-size: 13px;
             }
 
-            .subtitle-translated {
-                font-size: 12px;
+            .subtitle-translated.only-translation {
+                font-size: 14px;
+            }
+
+            .assist-panel {
+                min-height: unset;
             }
 
             .panel-body {
                 padding: 14px;
+                max-height: none;
+                overflow: visible;
             }
         }
     </style>
@@ -669,9 +706,8 @@
                 <div class="focus-badge" id="focusBadge">Speaking balance active</div>
 
                 <div class="live-subtitle" id="liveSubtitle">
-                    <div class="subtitle-label">Live Assist Subtitle</div>
-                    <div class="subtitle-original" id="subtitleOriginal">Listening...</div>
-                    <div class="subtitle-translated" id="subtitleTranslated">Translation will appear here</div>
+                    <div class="subtitle-label">Live Translation</div>
+                    <div class="subtitle-translated only-translation" id="subtitleTranslated">Translation will appear here</div>
                 </div>
 
                 <div class="name-tag remote-tag">
@@ -711,18 +747,6 @@
                         <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                     </svg>
                     <div class="control-tooltip">Speaker</div>
-                </button>
-
-                <button class="control-btn" id="blurBtn" onclick="toggleBlur()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <circle cx="12" cy="12" r="4"></circle>
-                        <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line>
-                        <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line>
-                        <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line>
-                        <line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line>
-                    </svg>
-                    <div class="control-tooltip">Blur</div>
                 </button>
 
                 <button class="control-btn" id="translateBtn" onclick="toggleTranslateAssist()">
@@ -795,18 +819,13 @@
                         <div class="feature-pill" id="gesturePill">Gesture Off</div>
                     </div>
                     <div class="assist-note">
-                        Turn on Translate to auto-listen for supported phrases. Turn on Gesture to use the real hand gesture recognizer from your camera feed.
+                        Turn on Translate to show only the matched translated phrase on screen. Turn on Gesture to use the hand gesture recognizer from your camera feed.
                     </div>
                 </div>
 
                 <div class="assist-card">
-                    <div class="label">Recognized Speech / Phrase</div>
-                    <div class="data-box" id="recognizedSpeech">No speech recognized yet.</div>
-                </div>
-
-                <div class="assist-card">
                     <div class="label">Translated Output</div>
-                    <div class="data-box" id="translatedSpeech">No translation yet.</div>
+                    <div class="data-box" id="translatedSpeech">Only translated phrase will appear here.</div>
                 </div>
 
                 <div class="assist-card">
@@ -816,11 +835,11 @@
 
                 <div class="assist-card">
                     <div class="label">Speaking Balance</div>
-                    <div class="data-box" id="focusStatus">Waiting for microphone activity.</div>
+                    <div class="data-box" id="focusStatus">Waiting for microphone activity. Demo reminder will appear after about 5 seconds.</div>
                 </div>
 
                 <div class="assist-card">
-                    <div class="label">Speaking Duration</div>
+                    <div class="label">Speaking Duration (demo)</div>
                     <div class="data-box" id="focusTimer">0 seconds</div>
                 </div>
 
@@ -842,7 +861,6 @@
         let micEnabled = true;
         let cameraEnabled = true;
         let speakerEnabled = true;
-        let blurEnabled = false;
 
         let recognition = null;
         let translateActive = false;
@@ -877,139 +895,65 @@
                 thai: "สวัสดี",
                 english: "Hello",
                 aliases: [
-                    "สวัสดี","sawasdee","sawadee","sawasdi","sa wad dee","sa was dee","sa wat dee","sawatdee","sawat di",
-                    "你好","ni hao","nihao","nee hao","neehow","ni how","nihow","mi hao","ming hao","nee ho","ni ho",
-                    "n hao","niha","ni hau","nihaw","ni haow","nihaoo","nihaow","nee haow","ni ao","ni hou",
-                    "knee hao","knee how","nihauw","neehau"
+                    "สวัสดี","sawasdee","sawadee","sawatdee","sa wad dee","sa wat dee","sawat di",
+                    "hello","helo","hallo","hey","hi","hai","haai",
+                    "你好","ni hao","nihao","nee hao","nee how","ni how","niho","ni ho","nihaw","ni hau",
+                    "meow","ming hao","mi hao","neehow","knee hao","nee haow","n hao","neo hao"
                 ]
             },
             {
-                key: "คุณได้ยินฉันไหม",
-                chinese: "你听得到我吗",
-                thai: "คุณได้ยินฉันไหม",
-                english: "Can you hear me?",
+                key: "คุณสบายดีไหม",
+                chinese: "你好吗",
+                thai: "คุณสบายดีไหม",
+                english: "How are you?",
                 aliases: [
-                    "คุณได้ยินฉันไหม","khun dai yin chan mai","kun dai yin chan mai","khun daiyin chan mai","dai yin mai","daiyin mai",
-                    "你听得到我吗","ni ting de dao wo ma","ni ting dao wo ma","ni ting de dao ma","ni ding dao wo ma",
-                    "nee ting the dao wo ma","ni tin dao wo ma","ni ting dow wo ma"
+                    "คุณสบายดีไหม","khun sabai dee mai","kun sabai dee mai","sabai dee mai","sบายดีไหม",
+                    "how are you","how r u","howre you","how are u","hows you","hao are you","har you",
+                    "你好吗","ni hao ma","nihaoma","nee hao ma","nee how ma","ni how ma","mi hao ma","ming hao ma"
                 ]
             },
             {
-                key: "ได้ยินค่ะ",
-                chinese: "听得到",
-                thai: "ได้ยินค่ะ",
-                english: "Yes, I can hear you.",
+                key: "ฉันสบายดี",
+                chinese: "我很好",
+                thai: "ฉันสบายดี",
+                english: "I am good.",
                 aliases: [
-                    "ได้ยินค่ะ","dai yin ka","daiyin ka","dai yin kha","daiyin kha","ได้ยิน","dai yin",
-                    "听得到","ting de dao","ting dedao","ting dao","ting de dow","tin de dao","ting the dao"
+                    "ฉันสบายดี","chan sabai dee","chan sabaidee","sabai dee","i am good","im good","i'm good",
+                    "am good","good","im fine","i am fine","fine thank you","i fine",
+                    "我很好","wo hen hao","wohenhao","wo han hao","wo hun hao","wohenghao","wo heng hao"
                 ]
             },
             {
-                key: "กรุณาพูดช้าลง",
-                chinese: "请慢一点说",
-                thai: "กรุณาพูดช้าลง",
-                english: "Please speak slowly.",
+                key: "คุณชื่ออะไร",
+                chinese: "你叫什么名字",
+                thai: "คุณชื่ออะไร",
+                english: "What is your name?",
                 aliases: [
-                    "กรุณาพูดช้าลง","karuna phut cha long","karuna pood cha long","phut cha cha","pood cha cha","พูดช้าลง",
-                    "请慢一点说","qing man yi dian shuo","ching man yi dian shuo","chin man yi dian shuo","qing manidian shuo",
-                    "ching man i dian shuo","qiang man yi dian shuo"
+                    "คุณชื่ออะไร","khun chue arai","kun cheu arai","chue arai","ชื่ออะไร",
+                    "what is your name","whats your name","what your name","your name","watch your name","what is name",
+                    "你叫什么名字","ni jiao shen me ming zi","ni jiao shenme mingzi","nee jiao shen me ming zi",
+                    "ni chiao shen me ming zi","ni jow shen me ming zi","ming zi"
                 ]
             },
             {
-                key: "ตอนนี้คุณอยู่ที่ไหน",
-                chinese: "你现在在哪里",
-                thai: "ตอนนี้คุณอยู่ที่ไหน",
-                english: "Where are you now?",
+                key: "ฉันชื่อ...",
+                chinese: "我叫...",
+                thai: "ฉันชื่อ...",
+                english: "My name is...",
                 aliases: [
-                    "ตอนนี้คุณอยู่ที่ไหน","ton ni khun yu thi nai","tonni khun yu tinai","khun yu thi nai","yu thi nai","อยู่ที่ไหน",
-                    "你现在在哪里","ni xian zai zai na li","ni xianzai zai nali","nee shian zai zai na li","ni sian zai zai nali",
-                    "ni shen zai zai na li","ni xian zai nari"
+                    "ฉันชื่อ","chan chue","my name is","mai name is","name is","i am","im",
+                    "我叫","wo jiao","wojiao","wo chiao","wo jao","wo jeow"
                 ]
             },
             {
-                key: "ฉันอยู่ที่บ้าน",
-                chinese: "我在家",
-                thai: "ฉันอยู่ที่บ้าน",
-                english: "I am at home.",
+                key: "ยินดีที่ได้รู้จัก",
+                chinese: "很高兴认识你",
+                thai: "ยินดีที่ได้รู้จัก",
+                english: "Nice to meet you.",
                 aliases: [
-                    "ฉันอยู่ที่บ้าน","chan yu thi ban","chan yu tee baan","yu thi ban","อยู่ที่บ้าน","thi ban",
-                    "我在家","wo zai jia","wozaijia","wo zai ja","wo zai chia","wo zai ga","wo zhai jia"
-                ]
-            },
-            {
-                key: "ตอนนี้คุณว่างไหม",
-                chinese: "你现在有空吗",
-                thai: "ตอนนี้คุณว่างไหม",
-                english: "Are you free now?",
-                aliases: [
-                    "ตอนนี้คุณว่างไหม","ton ni khun wang mai","tonni khun wang mai","khun wang mai","ว่างไหม","wang mai",
-                    "你现在有空吗","ni xian zai you kong ma","ni xianzai you kong ma","nee shian zai yo kong ma",
-                    "ni sian zai you kong ma","ni shen zai yo kong ma"
-                ]
-            },
-            {
-                key: "ฉันว่าง",
-                chinese: "我有空",
-                thai: "ฉันว่าง",
-                english: "I am free.",
-                aliases: [
-                    "ฉันว่าง","chan wang","chan waang","i wang","ว่าง","wang",
-                    "我有空","wo you kong","woyou kong","wo yo kong","wo yoh kong","wo you gong"
-                ]
-            },
-            {
-                key: "เราจะเริ่มตอนนี้",
-                chinese: "我们现在开始",
-                thai: "เราจะเริ่มตอนนี้",
-                english: "We will start now.",
-                aliases: [
-                    "เราจะเริ่มตอนนี้","rao ja reum ton ni","rao ja reerm ton ni","ja reum ton ni","เริ่มตอนนี้","reum ton ni",
-                    "我们现在开始","wo men xian zai kai shi","women xianzai kaishi","wo men sian zai kai shi",
-                    "wo men shian zai kai shi","women sien zai kai shi"
-                ]
-            },
-            {
-                key: "กรุณารอสักครู่",
-                chinese: "请等一下",
-                thai: "กรุณารอสักครู่",
-                english: "Please wait a moment.",
-                aliases: [
-                    "กรุณารอสักครู่","karuna ror sak kru","karuna ro sak kru","ror sak kru","ro sak kru","รอสักครู่",
-                    "请等一下","qing deng yi xia","ching deng yi sha","qing deng yixia","chin deng yi xia",
-                    "ching deng yi xia","qing ten yi xia"
-                ]
-            },
-            {
-                key: "ฉันจะกลับมาทันที",
-                chinese: "我马上回来",
-                thai: "ฉันจะกลับมาทันที",
-                english: "I will be right back.",
-                aliases: [
-                    "ฉันจะกลับมาทันที","chan ja klap ma than thi","chan ja glab ma tan ti","klap ma than thi","กลับมาทันที",
-                    "我马上回来","wo ma shang hui lai","wo mashang huilai","wo ma shan hui lai","wo ma sang wei lai",
-                    "wo ma shang wei lai","wo mashan huilai"
-                ]
-            },
-            {
-                key: "ฉันไม่เข้าใจ",
-                chinese: "我听不懂",
-                thai: "ฉันไม่เข้าใจ",
-                english: "I don't understand.",
-                aliases: [
-                    "ฉันไม่เข้าใจ","chan mai khao jai","chan mai kao jai","mai khao jai","mai kao jai","ไม่เข้าใจ",
-                    "我听不懂","wo ting bu dong","wo ting budong","wo ding bu dong","wo tin bu dong","wo ting pu dong",
-                    "wo ting bo dong","ting bu dong"
-                ]
-            },
-            {
-                key: "กรุณาพูดอีกครั้ง",
-                chinese: "请再说一遍",
-                thai: "กรุณาพูดอีกครั้ง",
-                english: "Please say that again.",
-                aliases: [
-                    "กรุณาพูดอีกครั้ง","karuna phut ik krang","karuna pood ik krang","phut ik krang","พูดอีกครั้ง",
-                    "请再说一遍","qing zai shuo yi bian","ching zai shuo yi bian","qing zai shuo yibian",
-                    "chin zai shuo yi bian","ching zai shuo i bian"
+                    "ยินดีที่ได้รู้จัก","yin dee tee dai roo jak","yindee teedai rujak","nice to meet you","nice meet you",
+                    "很高兴认识你","hen gao xing ren shi ni","hengao xing renshi ni","hen gow shing ren shir ni",
+                    "hen gao sing ren shi ni","ren shi ni"
                 ]
             },
             {
@@ -1018,40 +962,35 @@
                 thai: "ขอบคุณ",
                 english: "Thank you.",
                 aliases: [
-                    "ขอบคุณ","khob khun","khop khun","kob kun","kop khun","khobkun","ขอบคุน","khob koon",
-                    "谢谢","xie xie","xiexie","sie sie","she she","shay shay","che che","se se","xie sie","sie xie",
-                    "shie shie","shieh shieh","xia xia","shea shea","chee chee"
+                    "ขอบคุณ","khob khun","khop khun","kopkun","kob kun","khobkun",
+                    "thank you","thankyou","thanks","tank you","thank u","tengkyu","thx",
+                    "谢谢","xie xie","xiexie","sie sie","she she","shay shay","che che","se se","shie shie",
+                    "xia xia","shea shea","chee chee"
                 ]
             },
             {
-                key: "ไม่เป็นไร",
-                chinese: "不客气",
-                thai: "ไม่เป็นไร",
-                english: "You're welcome.",
+                key: "ลาก่อน",
+                chinese: "再见",
+                thai: "ลาก่อน",
+                english: "Goodbye.",
                 aliases: [
-                    "ไม่เป็นไร","mai pen rai","mai bpen rai","mai ben rai","mipenrai","ไม่เปนไร",
-                    "不客气","bu ke qi","bukeqi","pu ke chi","bu ker chi","bu ke chee","boo ke chi"
+                    "ลาก่อน","la gon","lagon","bye","goodbye","bye bye","บาย","บายบาย",
+                    "再见","zai jian","zaijian","zai jean","sai jian","jai jian","zye jian"
                 ]
             }
         ];
         const demoRolePlay = [
             { speaker: 'A', thai: 'สวัสดี', chinese: '你好', english: 'Hello' },
             { speaker: 'B', thai: 'สวัสดี', chinese: '你好', english: 'Hello' },
-            { speaker: 'A', thai: 'คุณได้ยินฉันไหม', chinese: '你听得到我吗', english: 'Can you hear me?' },
-            { speaker: 'B', thai: 'ได้ยินค่ะ', chinese: '听得到', english: 'Yes, I can hear you.' },
-            { speaker: 'A', thai: 'กรุณาพูดช้าลง', chinese: '请慢一点说', english: 'Please speak slowly.' },
-            { speaker: 'B', thai: 'ตอนนี้คุณอยู่ที่ไหน', chinese: '你现在在哪里', english: 'Where are you now?' },
-            { speaker: 'A', thai: 'ฉันอยู่ที่บ้าน', chinese: '我在家', english: 'I am at home.' },
-            { speaker: 'A', thai: 'ตอนนี้คุณว่างไหม', chinese: '你现在有空吗', english: 'Are you free now?' },
-            { speaker: 'B', thai: 'ฉันว่าง', chinese: '我有空', english: 'I am free.' },
-            { speaker: 'A', thai: 'เราจะเริ่มตอนนี้', chinese: '我们现在开始', english: 'We will start now.' },
-            { speaker: 'B', thai: 'กรุณารอสักครู่', chinese: '请等一下', english: 'Please wait a moment.' },
-            { speaker: 'B', thai: 'ฉันจะกลับมาทันที', chinese: '我马上回来', english: 'I will be right back.' },
-            { speaker: 'A', thai: 'ฉันไม่เข้าใจ', chinese: '我听不懂', english: "I don't understand." },
-            { speaker: 'B', thai: 'กรุณาพูดอีกครั้ง', chinese: '请再说一遍', english: 'Please say that again.' },
-            { speaker: 'A', thai: 'ขอบคุณ', chinese: '谢谢', english: 'Thank you.' },
-            { speaker: 'B', thai: 'ไม่เป็นไร', chinese: '不客气', english: "You're welcome." }
-        ];        const gestureMeaningMap = {            open_palm: {
+            { speaker: 'A', thai: 'คุณสบายดีไหม', chinese: '你好吗', english: 'How are you?' },
+            { speaker: 'B', thai: 'ฉันสบายดี', chinese: '我很好', english: 'I am good.' },
+            { speaker: 'A', thai: 'คุณชื่ออะไร', chinese: '你叫什么名字', english: 'What is your name?' },
+            { speaker: 'B', thai: 'ฉันชื่อ...', chinese: '我叫...', english: 'My name is...' },
+            { speaker: 'A', thai: 'ยินดีที่ได้รู้จัก', chinese: '很高兴认识你', english: 'Nice to meet you.' },
+            { speaker: 'B', thai: 'ขอบคุณ', chinese: '谢谢', english: 'Thank you.' },
+            { speaker: 'A', thai: 'ลาก่อน', chinese: '再见', english: 'Goodbye.' }
+        ];
+        const gestureMeaningMap = {            open_palm: {
                 title: "Hello",
                 thai: "สวัสดี",
                 chinese: "你好",
@@ -1143,7 +1082,9 @@
         }
 
         function buildTranslationOutput(phrase) {
-            return `TH: ${getThaiText(phrase)} | ZH: ${getChineseText(phrase)} | EN: ${getEnglishText(phrase)}`;
+            return `TH: ${getThaiText(phrase)}
+ZH: ${getChineseText(phrase)}
+EN: ${getEnglishText(phrase)}`;
         }
 
         function bindDataConnection(connection) {
@@ -1158,9 +1099,8 @@
                 if (!payload || typeof payload !== 'object') return;
 
                 if (payload.type === 'subtitle') {
-                    const original = payload.original || 'Remote speech detected';
                     const translated = payload.translated || 'Translation unavailable';
-                    updateSubtitle(`${payload.name || 'Remote'}: ${original}`, translated);
+                    updateSubtitle(translated);
                     document.getElementById('remoteNameTag').textContent = payload.name || 'Remote Participant';
                 }
 
@@ -1170,7 +1110,7 @@
                     badge.textContent = `Remote gesture: ${payload.title || 'Detected'}`;
                     badge.classList.add('active');
                     document.getElementById('gestureMeaning').textContent = gestureText;
-                    updateSubtitle(`${payload.name || 'Remote'} gesture: ${payload.title || 'Detected'}`, gestureText);
+                    updateSubtitle(gestureText);
                 }
             });
 
@@ -1341,12 +1281,6 @@
             document.getElementById('remoteVideo').muted = !speakerEnabled;
         }
 
-        function toggleBlur() {
-            blurEnabled = !blurEnabled;
-            document.getElementById('blurBtn').classList.toggle('active', blurEnabled);
-            document.getElementById('videoPreview').style.filter = blurEnabled ? 'blur(6px)' : 'none';
-        }
-
         function normalizeText(text) {
             return (text || '')
                 .toLowerCase()
@@ -1414,26 +1348,22 @@
             return bestScore >= 0.38 ? best : null;
         }
 
-        function updateSubtitle(original, translated) {
+        function updateSubtitle(translated) {
             const subtitle = document.getElementById('liveSubtitle');
-            const originalEl = document.getElementById('subtitleOriginal');
             const translatedEl = document.getElementById('subtitleTranslated');
 
-            if (!original && !translated) {
+            if (!translated) {
                 subtitle.classList.remove('active');
-                originalEl.textContent = 'Listening...';
                 translatedEl.textContent = 'Translation will appear here';
                 return;
             }
 
-            const currentKey = `${original}|||${translated}`;
+            const currentKey = translated;
             if (currentKey === lastSubtitleOutput) return;
             lastSubtitleOutput = currentKey;
 
             subtitle.classList.add('active');
-            originalEl.textContent = original;
             translatedEl.textContent = translated;
-            document.getElementById('recognizedSpeech').textContent = original;
             document.getElementById('translatedSpeech').textContent = translated;
         }
 
@@ -1502,18 +1432,9 @@
 
                 if (match) {
                     const translated = buildTranslationOutput(match);
-                    updateSubtitle(`Recognized: ${transcript}`, translated);
+                    updateSubtitle(translated);
                     sendAssistPayload({
                         type: 'subtitle',
-                        original: transcript,
-                        translated
-                    });
-                } else {
-                    const translated = 'No matching trained phrase found.';
-                    updateSubtitle(`Recognized: ${transcript}`, translated);
-                    sendAssistPayload({
-                        type: 'subtitle',
-                        original: transcript,
                         translated
                     });
                 }
@@ -1545,7 +1466,7 @@
                 recognition.stop();
                 recognition = null;
             }
-            updateSubtitle('', '');
+            updateSubtitle('');
             logConnection('Translation assist turned off.');
         }
 
@@ -1641,7 +1562,7 @@
             badge.classList.add('active');
 
             document.getElementById('gestureMeaning').textContent = output;
-            updateSubtitle(`Gesture Detected: ${meaning.title}`, output);
+            updateSubtitle(output);
             sendAssistPayload({
                 type: 'gesture',
                 title: meaning.title,
@@ -1688,8 +1609,8 @@
                     smoothedRms = smoothedRms ? (smoothedRms * 0.78) + (rms * 0.22) : rms;
                     const now = Date.now();
                     const speakingThreshold = 0.02;
-                    const silenceResetMs = 5500;
-                    const reminderMs = 20000;
+                    const silenceResetMs = 1800;
+                    const reminderMs = 5000;
 
                     if (smoothedRms > speakingThreshold) {
                         if (!speechStartedAt) {
@@ -1706,7 +1627,7 @@
                         if (durationMs >= reminderMs) {
                             setFocusState(
                                 'reminder',
-                                'You have been speaking for a while. Consider allowing others to contribute.'
+                                'You have been speaking for about 5 seconds. Good for demo speaking balance.'
                             );
                         }
                     } else {
