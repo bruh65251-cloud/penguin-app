@@ -819,7 +819,7 @@
                         <div class="feature-pill" id="gesturePill">Gesture Off</div>
                     </div>
                     <div class="assist-note">
-                        Turn on Translate to show only the matched translated phrase on screen. Turn on Gesture to use the hand gesture recognizer from your camera feed.
+                        Turn on Translate to show only the matched translated phrase on screen. Turn on Gesture to use the hand gesture recognizer from your camera feed. Mic tuning is biased toward nearby speech and softer voices, while reducing steady background noise.
                     </div>
                 </div>
 
@@ -1183,10 +1183,12 @@ EN: ${getEnglishText(phrase)}`;
                     },
                     audio: {
                         echoCancellation: true,
-                        noiseSuppression: false,
+                        noiseSuppression: true,
                         autoGainControl: true,
                         channelCount: 1,
-                        sampleRate: 48000
+                        sampleRate: 48000,
+                        sampleSize: 16,
+                        latency: 0
                     }
                 });
 
@@ -1622,8 +1624,27 @@ EN: ${getEnglishText(phrase)}`;
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 analyser = audioContext.createAnalyser();
                 analyser.fftSize = 2048;
+
+                const highpassFilter = audioContext.createBiquadFilter();
+                highpassFilter.type = 'highpass';
+                highpassFilter.frequency.value = 120;
+
+                const lowpassFilter = audioContext.createBiquadFilter();
+                lowpassFilter.type = 'lowpass';
+                lowpassFilter.frequency.value = 3400;
+
+                const compressor = audioContext.createDynamicsCompressor();
+                compressor.threshold.value = -30;
+                compressor.knee.value = 20;
+                compressor.ratio.value = 10;
+                compressor.attack.value = 0.003;
+                compressor.release.value = 0.2;
+
                 microphoneSource = audioContext.createMediaStreamSource(localStream);
-                microphoneSource.connect(analyser);
+                microphoneSource.connect(highpassFilter);
+                highpassFilter.connect(lowpassFilter);
+                lowpassFilter.connect(compressor);
+                compressor.connect(analyser);
 
                 const buffer = new Uint8Array(analyser.fftSize);
 
@@ -1650,10 +1671,10 @@ EN: ${getEnglishText(phrase)}`;
                     }
 
                     const rms = Math.sqrt(sum / buffer.length);
-                    smoothedRms = smoothedRms ? (smoothedRms * 0.65) + (rms * 0.35) : rms;
+                    smoothedRms = smoothedRms ? (smoothedRms * 0.58) + (rms * 0.42) : rms;
                     const now = Date.now();
-                    const speakingThreshold = 0.012;
-                    const silenceResetMs = 2400;
+                    const speakingThreshold = 0.009;
+                    const silenceResetMs = 2200;
                     const reminderMs = 5000;
 
                     if (smoothedRms > speakingThreshold) {
