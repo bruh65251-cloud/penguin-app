@@ -295,6 +295,21 @@
             margin-bottom: 6px;
         }
 
+
+        .subtitle-heard {
+            font-size: 12px;
+            color: rgba(255,255,255,0.65);
+            line-height: 1.45;
+            margin-bottom: 6px;
+        }
+
+        .subtitle-matched {
+            font-size: 12px;
+            color: #fde68a;
+            line-height: 1.45;
+            margin-bottom: 6px;
+        }
+
         .subtitle-translated {
             font-size: 13px;
             color: #93c5fd;
@@ -707,6 +722,8 @@
 
                 <div class="live-subtitle" id="liveSubtitle">
                     <div class="subtitle-label">Live Translation</div>
+                    <div class="subtitle-heard" id="subtitleHeard">Heard: waiting for speech...</div>
+                    <div class="subtitle-matched" id="subtitleMatched">Matched: waiting for phrase...</div>
                     <div class="subtitle-translated only-translation" id="subtitleTranslated">Translation will appear here</div>
                 </div>
 
@@ -819,7 +836,7 @@
                         <div class="feature-pill" id="gesturePill">Gesture Off</div>
                     </div>
                     <div class="assist-note">
-                        Turn on Translate to show only the matched translated phrase on screen. Turn on Gesture to use the hand gesture recognizer from your camera feed. Mic tuning is biased toward nearby speech and softer voices, while reducing steady background noise.
+                        Turn on Translate to show what the browser heard, then map it to the nearest controlled demo phrase. This prevents random raw speech from being translated incorrectly and improves demo stability for accents.
                     </div>
                 </div>
 
@@ -890,147 +907,181 @@
 
         const trainedPhrases = [
             {
-                key: "สวัสดี",
-                chinese: "你好",
-                thai: "สวัสดี",
-                english: "Hello",
+                key: "audio_check",
+                intended: "ting de dao ma",
+                english: "Can you hear me?",
+                chinese: "听得到吗？",
+                thai: "ได้ยินไหม",
                 aliases: [
-                    "สวัสดี","sawasdee","sawadee","sawatdee","sa wad dee","sa wat dee","sawat di",
-                    "sa wad di","sa wat di","sawaddi","sawatdi","sa watdii","sawasdii",
-                    "ni hao","nee hao","nihao","neehow","nee how","ni how","ni haw","nee haw",
-                    "ni hau","nee hau","mi hao","me hao","ming hao","min hao","meow","miao",
-                    "ni ao","nee ao","ni ow","nee ow","li hao","nee haow","ni haow"
+                    "ting de dao ma", "ting de dao", "ting dao ma", "ting dao", "ting the dao ma",
+                    "ting the dow ma", "teen de dao ma", "teen dao ma", "thing de dao ma", "thing dao ma",
+                    "thing the doll ma", "thing the dog ma", "thing the down ma", "tin de dao ma", "tin dao ma",
+                    "team dao ma", "teen down ma", "teen doubt ma", "ten dao ma", "tender dao ma",
+                    "can you hear me", "can hear me", "you hear me", "hear me", "can you here me",
+                    "can you hero me", "do you hear me", "audio check", "mic check", "sound check",
+                    "dai yin mai", "dai yin", "dai yin dai mai", "dai in mai", "die in my", "dye in my",
+                    "dai yen mai", "day yin my", "thai yin mai", "hear my voice"
+                ,
+                    "$10 ma", "ten dollar ma", "tienda del mar", "tienda tama", "tien tadaoma", "tien ta dao ma", "tian da dao ma", "tender del mar", "teen tada oma", "tien tada oma"]
+            },
+            {
+                key: "yes_hear",
+                intended: "ting de dao",
+                english: "Yes, I can hear you.",
+                chinese: "听得到。",
+                thai: "ได้ยิน",
+                aliases: [
+                    "ting de dao", "ting dao", "ting the dao", "teen dao", "thing dao", "tin dao",
+                    "i can hear you", "i hear you", "yes i can hear you", "yes hear you", "yes i hear",
+                    "hear you", "got your voice", "sound is okay", "audio is okay", "yes okay",
+                    "dai yin", "dai yin dai", "dai in", "die in", "dye in", "yin laew", "dai yin laew",
+                    "i can here you", "i hear u", "i can hear u"
                 ]
             },
             {
-                key: "คุณสบายดีไหม",
-                chinese: "你好吗",
-                thai: "คุณสบายดีไหม",
-                english: "How are you?",
+                key: "day_check",
+                intended: "jin tian hai hao ma",
+                english: "How is your day today?",
+                chinese: "今天还好吗？",
+                thai: "วันนี้โอเคไหม",
                 aliases: [
-                    "คุณสบายดีไหม","khun sabai dee mai","kun sabai dee mai","koon sabai dee mai",
-                    "sabai dee mai","sabaidee mai","sabai di mai","sabuy dee mai",
-                    "sabidee mai","sabay dee mai","sa bai dee mai","sa by dee mai",
-                    "khun sabai mai","kun sabai mai","koon sabai mai",
-                    "sabai mai","sabuy mai","sabay mai","sabai mey","sabai meh",
-                    "sa bai mai","sa bai mey","sa bai meh",
-                    "nee hao ma","ni hao ma","nihaoma","ni hao mah","ni hao maa",
-                    "ni how ma","ni how mah","ni how maa",
-                    "nee how ma","nee how mah","nee how maa",
-                    "ni hau ma","nee hau ma","ni haw ma","nee haw ma",
-                    "mi hao ma","me hao ma","mee hao ma","ming hao ma",
-                    "min hao ma","miao ma","meow ma","mi how ma","ming how ma",
-                    "ni ao ma","nee ao ma","ni ow ma","nee ow ma"
+                    "jin tian hai hao ma", "jin tian hao ma", "jin tian hai hao", "jintian hai hao ma",
+                    "jin tien hai hao ma", "gin tian hai hao ma", "chin tian hai hao ma", "jing tian hai hao ma",
+                    "jim tian hi how ma", "gin tien hi how ma", "jean tian hai hao ma", "jin tian high how ma",
+                    "today okay", "today ok", "how is your day", "how's your day", "how your day",
+                    "how are you today", "your day okay", "day ok", "day okay",
+                    "wan nee ok mai", "wan ni ok mai", "wan nee okay mai", "wan nee o ke mai", "today ok mai"
+                ,
+                    "tintin high homer", "1010 hi houma", "ten ten hi houma", "tintian hi houma", "tin tian hi houma", "jensen high homer", "jensen hi houma", "jinson high homer", "tintin hi how ma", "ten ten hai hao ma"]
+            },
+            {
+                key: "day_reply",
+                intended: "hai ke yi",
+                english: "It is okay.",
+                chinese: "还可以。",
+                thai: "ก็โอเค",
+                aliases: [
+                    "hai ke yi", "hai keyi", "hai ke yee", "hi ke yi", "high key", "high key yi",
+                    "haike yi", "hai kuh yi", "hai curry", "high curry", "high can eat", "hi kitty",
+                    "it is okay", "it's okay", "it okay", "not bad", "pretty okay", "okay today", "fine",
+                    "koei koei", "koi koi", "koey koey", "kor ok", "kor okay", "ok ok"
+                ,
+                    "hot tea", "i call you", "hi kai", "hi hi kay", "hi hi key", "high kay", "hai kay", "i k u", "i key yi"]
+            },
+            {
+                key: "doing_what",
+                intended: "ni zai zuo shen me",
+                english: "What are you doing?",
+                chinese: "你在做什么？",
+                thai: "ทำอะไรอยู่",
+                aliases: [
+                    "ni zai zuo shen me", "ni zai zuo shenme", "zai zuo shen me", "zai zuo shenme",
+                    "nee zai zwo shen me", "nee zai zoo shen me", "ni zai zoo shen me", "ni zai so shen me",
+                    "me zai zoo shen me", "knee zai zoo shen me", "ni sigh zoo shen me", "ni zai joe shen me",
+                    "what are you doing", "what you doing", "doing what", "what are u doing", "what u doing",
+                    "ter kamlang tham arai", "kamlang tham arai", "tham arai yu", "tam arai yu", "tum arai yu",
+                    "tham rai yu", "doing now", "what doing now"
+                ,
+                    "the tight joshua", "you touch your smile", "attack joshua", "you touch all summer", "need that's awesome", "the title sama", "he died talking", "need title sharma", "and i thought shema", "utah", "the title cinema", "josh", "near me", "need that awesome", "new title summer", "knee title shen ma"]
+            },
+            {
+                key: "doing_work",
+                intended: "wo zai zuo gong ke",
+                english: "I am doing work.",
+                chinese: "我在做功课。",
+                thai: "กำลังทำงาน",
+                aliases: [
+                    "wo zai zuo gong ke", "wo zai zuo gongke", "wo zai zoo gong ke", "wo zai zwo gong ke",
+                    "wo sigh zoo gong ke", "who zai zoo gong ke", "wall zai zoo gong ke", "wo zai do gong ke",
+                    "wo zai gong ke", "zuo gong ke", "zoo gong ke", "doing homework", "doing work", "doing my work",
+                    "i am doing work", "i'm doing work", "i do work", "i'm working", "work now",
+                    "chan kamlang tham ngan", "kamlang tham ngan", "tham ngan yu", "tham kan ban", "tam ngan",
+                    "doing assignment", "doing school work"
+                ,
+                    "i'll talk to a concur", "ill talk to a concur", "i'll try to conquer", "ill try to conquer", "will i talk", "or title concord", "what i talk", "all title concord", "water concord", "war i talk", "we'll try to conquer", "well try to conquer", "will try conquer", "wo try conquer", "all try conquer"]
+            },
+            {
+                key: "sounds_busy",
+                intended: "ting qi lai hen mang",
+                english: "Sounds busy.",
+                chinese: "听起来很忙。",
+                thai: "ดูเหมือนยุ่งนะ",
+                aliases: [
+                    "ting qi lai hen mang", "ting chi lai hen mang", "ting qi lai mang", "ting chila hen mang",
+                    "thing chi lie hen mang", "teen chi lai hen mang", "ting key lie hen mang", "ting she lie hen mang",
+                    "sounds busy", "sound busy", "you sound busy", "seems busy", "look busy", "looks busy",
+                    "du muean yungk", "doo muean yung", "du mean young", "muean yungk", "seem busy"
+                ,
+                    "attention", "tintillai panama", "tint elite herman", "tinchillai haman", "teen july among", "teen titans", "teen chili hammond", "tint chili haman", "tin july among", "ting july a mang", "teen chi lie haman"]
+            },
+            {
+                key: "manageable",
+                intended: "hai hao la",
+                english: "It is still manageable.",
+                chinese: "还好啦。",
+                thai: "ก็ยังไหว",
+                aliases: [
+                    "hai hao la", "hai hao lah", "hai how la", "hi how la", "high how la", "hai haw la",
+                    "hai ho la", "hi hola", "high hola", "not too bad", "manageable", "still okay", "it's fine",
+                    "koei koei la", "koi koi la", "kor yang wai", "yang wai", "still fine", "still ok"
                 ]
             },
             {
-                key: "ฉันสบายดี",
-                chinese: "我很好",
-                thai: "ฉันสบายดี",
-                english: "I am good.",
+                key: "eat_later",
+                intended: "deng xia yi qi chi fan ba",
+                english: "Let’s eat together later.",
+                chinese: "等下一起吃饭吧。",
+                thai: "เดี๋ยวไปกินข้าวด้วยกัน",
                 aliases: [
-                    "ฉันสบายดี",
-                    "chan sabai dee","chan sabaidee","chan sabai di","chan sabuy dee",
-                    "chan sabidee","chan sabay dee","chan sa bai dee",
-                    "chun sabai dee","chon sabai dee","shan sabai dee",
-                    "sabai dee","sabaidee","sabuy dee","sabidee","sabay dee",
-                    "sa bai dee","sa by dee","sabai di",
-                    "wo hen hao","wohenhao","wo hen haw","wo hen how",
-                    "wo han hao","wo hun hao","wo hong hao","wo hang hao",
-                    "wo heng hao","wo hng hao","woh hen hao","wohenghao",
-                    "wo hao","wo haw","wo how",
-                    "o hen hao","o hen haw","wo en hao","wo in hao"
-                ]
+                    "deng xia yi qi chi fan ba", "deng xia yiqi chi fan ba", "deng xia chi fan ba",
+                    "deng shia ee chee chi fan ba", "dung shia ee chee chi fan ba", "deng sha yi chi fan ba",
+                    "then she eat she fan ba", "done she eat she fan ba", "deng xia chi fan", "yi qi chi fan",
+                    "let's eat later", "lets eat later", "go eat later", "eat together later", "let us eat together",
+                    "pai kin khao duai kan", "pai kin duai kan", "diao pai kin duai kan", "kin khao kan", "eat later"
+                ,
+                    "and shaiichi funk", "sunshine each season", "thank you chicken bar", "sunshine", "sunshine youtube thunder", "thank you samba", "thanks", "sunshine you just september", "i'm sorry it should remember", "im sorry it should remember", "thank you so far", "thank you chicken ba", "sunshine chicken ba", "thank you chi fan ba", "deng shia chi fan ba"]
             },
             {
-                key: "คุณชื่ออะไร",
-                chinese: "你叫什么名字",
-                thai: "คุณชื่ออะไร",
-                english: "What is your name?",
+                key: "agree_no_problem",
+                intended: "hao a mei wen ti",
+                english: "Okay, no problem.",
+                chinese: "好啊，没问题。",
+                thai: "โอเค ไม่มีปัญหา",
                 aliases: [
-                    "คุณชื่ออะไร",
-                    "khun chue arai","kun chue arai","koon chue arai",
-                    "khun cheu arai","kun cheu arai","koon cheu arai",
-                    "chue arai","cheu arai","chu arai","chur arai",
-                    "chue alai","cheu alai","chu alai","shue arai","shu arai",
-                    "ชื่ออะไร","ชื่ออาราย","ชืออะไร",
-                    "ni jiao shen me ming zi",
-                    "ni jiao shenme mingzi",
-                    "nee jiao shen me ming zi",
-                    "nee jeow shen me ming zi",
-                    "ni jeow shen me ming zi",
-                    "ni jao shen me ming zi",
-                    "nee jao shen me ming zi",
-                    "ni chiao shen me ming zi",
-                    "nee chiao shen me ming zi",
-                    "ming zi","mingzi","ming ji","ming jee","ming zee",
-                    "min zi","minji","mingsi","ming she","ming zhe",
-                    "ni jiao ming zi","nee jiao ming zi","ni jeow ming zi","nee jeow ming zi"
-                ]
+                    "hao a mei wen ti", "hao a mei wenti", "hao ah mei wen ti", "how a may wen tea",
+                    "how are may wenty", "hao a no problem", "mei wen ti", "mei wenti", "may wenty", "my twenty",
+                    "okay no problem", "ok no problem", "okay sure", "sure no problem", "alright no problem",
+                    "ok loei mai mee panha", "ok loei", "mai mee panha", "mai mi panha", "no problem"
+                ,
+                    "holla may want tea", "power may 1t", "power may 18", "power miwanti", "power me want tea", "holla mei wenti", "howla may wenty", "how a may one tea", "hao la mei wenti"]
             },
             {
-                key: "ฉันชื่อ...",
-                chinese: "我叫...",
-                thai: "ฉันชื่อ...",
-                english: "My name is...",
+                key: "see_later",
+                intended: "deng xia jian",
+                english: "See you later.",
+                chinese: "等下见。",
+                thai: "เดี๋ยวเจอกัน",
                 aliases: [
-                    "ฉันชื่อ",
-                    "chan chue","chan cheu","chan chu","chan shue",
-                    "chun chue","chon chue","shan chue",
-                    "chue","cheu","chu","shue","sheu",
-                    "wo jiao","wojiao","wo jao","wo jeow","wo jow",
-                    "woh jiao","woh jao","woh jeow",
-                    "wo chiao","wo cheow","wo jaw","wo jaew",
-                    "o jiao","o jao","o jeow","wo jiow","wo jea"
-                ]
-            },
-            {
-                key: "ยินดีที่ได้รู้จัก",
-                chinese: "很高兴认识你",
-                thai: "ยินดีที่ได้รู้จัก",
-                english: "Nice to meet you.",
-                aliases: [
-                    "ยินดีที่ได้รู้จัก","yin dee tee dai roo jak","yindee teedai rujak","yin di tee dai ru jak",
-                    "yin dee dai roo jak","yin dee roo jak","yin di roo jak",
-                    "hen gao xing ren shi ni","hengao xing renshi ni","hen gow shing ren shir ni",
-                    "hen gao sing ren shi ni","hen gao shing ren shi ni","ren shi ni","renshi ni","ren si ni",
-                    "hen gao xing","hengao sing","hen gow sing"
-                ]
-            },
-            {
-                key: "ขอบคุณ",
-                chinese: "谢谢",
-                thai: "ขอบคุณ",
-                english: "Thank you.",
-                aliases: [
-                    "ขอบคุณ","khob khun","khop khun","kopkun","kob kun","khobkun",
-                    "khob koon","kop koon","kob khun","khop koon",
-                    "xie xie","xiexie","sie sie","she she","shay shay","che che","se se","shie shie",
-                    "xia xia","shea shea","chee chee","sie xie","shei shei","say say","sye sye"
-                ]
-            },
-            {
-                key: "ลาก่อน",
-                chinese: "再见",
-                thai: "ลาก่อน",
-                english: "Goodbye.",
-                aliases: [
-                    "ลาก่อน","la gon","lagon","la gorn","la korn","la kon","ลา ก่อน","ลา กอน",
-                    "zai jian","zaijian","zai jean","sai jian","jai jian","zye jian","zai jiann",
-                    "zai jen","zai jeen","jai jean","sai jean"
-                ]
+                    "deng xia jian", "deng shia jian", "dung shia jian", "then she jian", "done she jian",
+                    "deng xia jean", "deng xia gin", "deng xia jen", "see you later", "see ya later",
+                    "later see you", "see you soon", "talk later", "jer gan", "diao jer gan", "laew jer gan", "ok jer gan"
+                ,
+                    "now i'm at the shop", "now im at the shop", "no woman that shot again", "now i'm at that", "now im at that", "now woman then then shot again", "then shot again", "no woman being shot in", "no woman then shotgun", "holden shot in", "holden champion", "holland", "help them shot in", "hold them shot in", "hao deng xia jian", "na wo men deng xia jian", "no woman deng xia jian"]
             }
         ];
         const demoRolePlay = [
-            { speaker: 'A', thai: 'สวัสดี', chinese: '你好', english: 'Hello' },
-            { speaker: 'B', thai: 'สวัสดี', chinese: '你好', english: 'Hello' },
-            { speaker: 'A', thai: 'คุณสบายดีไหม', chinese: '你好吗', english: 'How are you?' },
-            { speaker: 'B', thai: 'ฉันสบายดี', chinese: '我很好', english: 'I am good.' },
-            { speaker: 'A', thai: 'คุณชื่ออะไร', chinese: '你叫什么名字', english: 'What is your name?' },
-            { speaker: 'B', thai: 'ฉันชื่อ...', chinese: '我叫...', english: 'My name is...' },
-            { speaker: 'A', thai: 'ยินดีที่ได้รู้จัก', chinese: '很高兴认识你', english: 'Nice to meet you.' },
-            { speaker: 'B', thai: 'ขอบคุณ', chinese: '谢谢', english: 'Thank you.' },
-            { speaker: 'A', thai: 'ลาก่อน', chinese: '再见', english: 'Goodbye.' }
+            { speaker: 'A', pinyin: 'hey, ting de dao ma', thailish: 'hey dai yin mai', english: 'Can you hear me?' },
+            { speaker: 'B', pinyin: 'ting de dao', thailish: 'dai yin', english: 'Yes, I can hear you.' },
+            { speaker: 'A', pinyin: 'jin tian hai hao ma', thailish: 'wan nee ok mai', english: 'How is your day today?' },
+            { speaker: 'B', pinyin: 'hai ke yi', thailish: 'koei koei', english: 'It is okay.' },
+            { speaker: 'A', pinyin: 'ni zai zuo shen me', thailish: 'ter kamlang tham arai', english: 'What are you doing?' },
+            { speaker: 'B', pinyin: 'wo zai zuo gong ke', thailish: 'chan kamlang tham ngan', english: 'I am doing work.' },
+            { speaker: 'A', pinyin: 'ting qi lai hen mang', thailish: 'du muean yungk', english: 'Sounds busy.' },
+            { speaker: 'B', pinyin: 'hai hao la', thailish: 'koei koei la', english: 'It is still manageable.' },
+            { speaker: 'A', pinyin: 'deng xia yi qi chi fan ba', thailish: 'diao pai kin duai kan', english: 'Let’s eat together later.' },
+            { speaker: 'B', pinyin: 'hao a mei wen ti', thailish: 'ok loei mai mee panha', english: 'Okay, no problem.' },
+            { speaker: 'A', pinyin: 'na wo men deng xia jian', thailish: 'diao jer gan', english: 'See you later.' },
+            { speaker: 'B', pinyin: 'hao deng xia jian', thailish: 'ok jer gan', english: 'See you later.' }
         ];
         const gestureMeaningMap = {            open_palm: {
                 title: "Hello",
@@ -1124,9 +1175,9 @@
         }
 
         function buildTranslationOutput(phrase) {
-            return `TH: ${getThaiText(phrase)}
-ZH: ${getChineseText(phrase)}
-EN: ${getEnglishText(phrase)}`;
+            return `EN: ${getEnglishText(phrase)}
+TH: ${getThaiText(phrase)}
+ZH: ${getChineseText(phrase)}`;
         }
 
         function bindDataConnection(connection) {
@@ -1370,47 +1421,95 @@ EN: ${getEnglishText(phrase)}`;
             return 1 - distance / Math.max(cleanA.length, cleanB.length);
         }
 
+        function phoneticNormalize(text) {
+            return cleanInput(text)
+                .replace(/zh/g, 'j')
+                .replace(/ch/g, 'sh')
+                .replace(/x/g, 'sh')
+                .replace(/q/g, 'ch')
+                .replace(/c/g, 'k')
+                .replace(/v/g, 'w')
+                .replace(/ph/g, 'f')
+                .replace(/th/g, 't')
+                .replace(/oo/g, 'u')
+                .replace(/ee/g, 'i')
+                .replace(/ai/g, 'ay')
+                .replace(/ao/g, 'ow')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function tokenOverlapScore(a, b) {
+            const aTokens = new Set(cleanInput(a).split(' ').filter(Boolean));
+            const bTokens = new Set(cleanInput(b).split(' ').filter(Boolean));
+            if (!aTokens.size || !bTokens.size) return 0;
+            let overlap = 0;
+            aTokens.forEach(token => { if (bTokens.has(token)) overlap++; });
+            return overlap / Math.max(aTokens.size, bTokens.size);
+        }
+
+        function phraseScore(input, alias) {
+            const cleanA = cleanInput(input);
+            const cleanB = cleanInput(alias);
+            if (!cleanA || !cleanB) return 0;
+
+            let score = similarityScore(cleanA, cleanB);
+            const phoneScore = similarityScore(phoneticNormalize(cleanA), phoneticNormalize(cleanB));
+            const overlap = tokenOverlapScore(cleanA, cleanB);
+            score = Math.max(score, phoneScore * 0.94, overlap * 0.78);
+
+            if (cleanA.includes(cleanB) || cleanB.includes(cleanA)) score += 0.12;
+            if (cleanA.split(' ').length <= 2 && cleanB.split(' ').length <= 2) score += 0.03;
+            return Math.min(score, 1);
+        }
+
         function findBestPhraseMatch(input) {
             const cleanedInput = cleanInput(input);
             let best = null;
             let bestScore = 0;
+            let bestAlias = '';
 
             trainedPhrases.forEach(phrase => {
-                phrase.aliases.forEach(alias => {
-                    const cleanAlias = cleanInput(alias);
-                    let score = similarityScore(cleanedInput, cleanAlias);
-
-                    if (cleanedInput.includes(cleanAlias) || cleanAlias.includes(cleanedInput)) {
-                        score += 0.08;
-                    }
-
+                const allAliases = [phrase.intended, phrase.english, phrase.chinese, phrase.thai, ...(phrase.aliases || [])];
+                allAliases.forEach(alias => {
+                    const score = phraseScore(cleanedInput, alias);
                     if (score > bestScore) {
                         bestScore = score;
                         best = phrase;
+                        bestAlias = alias;
                     }
                 });
             });
 
-            return bestScore >= 0.30 ? best : null;
+            // Lower threshold because the system is restricted to a small demo phrase set.
+            // It still refuses very weak matches and asks the user to repeat.
+            return bestScore >= 0.28 ? { phrase: best, score: bestScore, alias: bestAlias } : null;
         }
 
-        function updateSubtitle(translated) {
+        function updateSubtitle(translated, heard = '', matched = '') {
             const subtitle = document.getElementById('liveSubtitle');
             const translatedEl = document.getElementById('subtitleTranslated');
+            const heardEl = document.getElementById('subtitleHeard');
+            const matchedEl = document.getElementById('subtitleMatched');
 
-            if (!translated) {
+            if (!translated && !heard) {
                 subtitle.classList.remove('active');
+                heardEl.textContent = 'Heard: waiting for speech...';
+                matchedEl.textContent = 'Matched: waiting for phrase...';
                 translatedEl.textContent = 'Translation will appear here';
                 return;
             }
 
-            const currentKey = translated;
-            if (currentKey === lastSubtitleOutput) return;
-            lastSubtitleOutput = currentKey;
-
             subtitle.classList.add('active');
-            translatedEl.textContent = translated;
-            document.getElementById('translatedSpeech').textContent = translated;
+            if (heard) heardEl.textContent = `Heard: ${heard}`;
+            if (matched) matchedEl.textContent = `Matched: ${matched}`;
+            if (translated) {
+                const currentKey = `${heard}|${matched}|${translated}`;
+                if (currentKey === lastSubtitleOutput) return;
+                lastSubtitleOutput = currentKey;
+                translatedEl.textContent = translated;
+                document.getElementById('translatedSpeech').textContent = `${heard ? `Heard: ${heard}\n` : ''}${matched ? `Matched: ${matched}\n` : ''}${translated}`;
+            }
         }
 
         function setTranslateUi(active) {
@@ -1453,7 +1552,7 @@ EN: ${getEnglishText(phrase)}`;
             recognition.lang = 'en-US';
             recognition.continuous = true;
             recognition.interimResults = true;
-            recognition.maxAlternatives = 8;
+            recognition.maxAlternatives = 10;
 
             translateActive = true;
             setTranslateUi(true);
@@ -1462,26 +1561,47 @@ EN: ${getEnglishText(phrase)}`;
             recognition.onresult = (event) => {
                 const result = event.results[event.results.length - 1];
                 const candidates = [];
+
                 for (let i = 0; i < result.length; i++) {
-                    if (result[i] && result[i].transcript) candidates.push(result[i].transcript);
+                    if (result[i] && result[i].transcript) candidates.push(result[i].transcript.trim());
                 }
-                const transcript = candidates[0] || result[0].transcript;
 
-                let match = null;
+                const transcript = candidates[0] || (result[0] ? result[0].transcript.trim() : '');
+                if (!transcript) return;
+
+                // Always show whatever the browser captured, even before matching.
+                updateSubtitle('', transcript, 'Checking nearest demo phrase...');
+
+                let bestMatch = null;
                 for (const candidate of candidates) {
-                    match = findBestPhraseMatch(candidate);
-                    if (match) break;
-                }
-                if (!match) {
-                    match = findBestPhraseMatch(transcript);
+                    const candidateMatch = findBestPhraseMatch(candidate);
+                    if (!bestMatch || (candidateMatch && candidateMatch.score > bestMatch.score)) {
+                        bestMatch = candidateMatch;
+                    }
                 }
 
-                if (match) {
-                    const translated = buildTranslationOutput(match);
-                    updateSubtitle(translated);
+                if (!bestMatch) bestMatch = findBestPhraseMatch(transcript);
+
+                if (!bestMatch) {
+                    if (result.isFinal) {
+                        const retryText = 'Please repeat slowly. The phrase is outside the demo phrase bank.';
+                        updateSubtitle(retryText, transcript, 'No safe match');
+                        document.getElementById('translatedSpeech').textContent = `Heard: ${transcript}\nMatched: No safe match\n${retryText}`;
+                    }
+                    return;
+                }
+
+                const match = bestMatch.phrase;
+                const matchedLabel = `${match.intended || match.english} (${Math.round(bestMatch.score * 100)}%)`;
+                const translated = buildTranslationOutput(match);
+
+                updateSubtitle(translated, transcript, matchedLabel);
+
+                // Sync final matched subtitles to the other participant. Interim text stays local.
+                if (result.isFinal) {
                     sendAssistPayload({
                         type: 'subtitle',
-                        translated
+                        translated: `${transcript ? `Heard: ${transcript}\n` : ''}Matched: ${matchedLabel}\n${translated}`
                     });
                 }
             };
