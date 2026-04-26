@@ -844,6 +844,11 @@
                 align-items: stretch;
             }
         }
+    
+        .assist-value {
+            transition: border-left 0.2s ease, padding-left 0.2s ease;
+        }
+
     </style>
 </head>
 <body>
@@ -1142,6 +1147,66 @@
         const rewriteValueEl = document.getElementById('rewriteValue');
         const priorityPillEl = document.getElementById('priorityPill');
 
+        const informalReplacements = [
+            { from: /\bpls\b|\bplz\b/gi, to: 'please' },
+            { from: /\bu\b/gi, to: 'you' },
+            { from: /\bur\b/gi, to: 'your' },
+            { from: /\br\b/gi, to: 'are' },
+            { from: /\bthx\b|\bty\b|\bthanks\b/gi, to: 'thank you' },
+            { from: /\basap\b/gi, to: 'as soon as possible' },
+            { from: /\bidk\b/gi, to: 'I am not sure' },
+            { from: /\bimo\b|\bimho\b/gi, to: 'in my opinion' },
+            { from: /\bgonna\b/gi, to: 'going to' },
+            { from: /\bwanna\b/gi, to: 'want to' },
+            { from: /\bgotta\b/gi, to: 'need to' },
+            { from: /\bkinda\b/gi, to: 'somewhat' },
+            { from: /\bcuz\b|\bcos\b|\bcause\b/gi, to: 'because' },
+            { from: /\bnvm\b/gi, to: 'never mind' },
+            { from: /\btbh\b/gi, to: 'to be honest' },
+            { from: /\bbrb\b/gi, to: 'I will be back shortly' },
+            { from: /\bomg\b/gi, to: '' },
+            { from: /\blol\b|\blmao\b|\bhaha+\b|\bhehe+\b/gi, to: '' },
+            { from: /\bbro\b|\bdude\b|\bman\b|\bbrother\b/gi, to: '' },
+            { from: /\bchill\b/gi, to: 'please do not worry' },
+            { from: /\bmessed up\b/gi, to: 'encountered an issue' },
+            { from: /\bbroken\b/gi, to: 'not working correctly' },
+            { from: /\bbuggy\b/gi, to: 'unstable' },
+            { from: /\bbad\b/gi, to: 'problematic' },
+            { from: /\btrash\b/gi, to: 'not suitable yet' },
+            { from: /\bweird\b/gi, to: 'unexpected' }
+        ];
+
+        const rewriteRules = [
+            {
+                patterns: [/send it/i, /send me/i, /give me/i],
+                rewrite: () => 'Could you please send the relevant file or details as soon as possible?'
+            },
+            {
+                patterns: [/fix it/i, /fix this/i, /do it/i],
+                rewrite: () => 'Could you please review the issue and update me once it has been fixed?'
+            },
+            {
+                patterns: [/check this/i, /look at this/i],
+                rewrite: () => 'Could you please review this and share your feedback when you have time?'
+            },
+            {
+                patterns: [/call/i, /meeting/i],
+                rewrite: () => 'Could we move this discussion to a short call so we can clarify it faster?'
+            },
+            {
+                patterns: [/not working/i, /doesn't work/i, /dont work/i, /bug/i, /error/i],
+                rewrite: () => 'The feature is currently not working as expected. Could you please help review the issue?'
+            },
+            {
+                patterns: [/later/i, /soon/i, /maybe/i],
+                rewrite: () => 'Could we confirm a specific time or deadline for this task?'
+            },
+            {
+                patterns: [/as soon as possible/i, /urgent/i, /immediately/i],
+                rewrite: () => 'This is urgent. Could you please prioritize it and update the team as soon as possible?'
+            }
+        ];
+
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
@@ -1149,27 +1214,42 @@
         }
 
         function normalizeMessage(message) {
-            return message.trim().replace(/\s+/g, ' ');
+            return (message || '').trim().replace(/\s+/g, ' ');
+        }
+
+        function cleanForRewrite(message) {
+            let cleaned = normalizeMessage(message);
+
+            informalReplacements.forEach(rule => {
+                cleaned = cleaned.replace(rule.from, rule.to);
+            });
+
+            return cleaned
+                .replace(/\s+/g, ' ')
+                .replace(/\s+([,.!?])/g, '$1')
+                .trim();
+        }
+
+        function sentenceCase(message) {
+            const trimmed = normalizeMessage(message);
+            if (!trimmed) return '';
+            return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+        }
+
+        function ensurePunctuation(message) {
+            const trimmed = normalizeMessage(message);
+            if (!trimmed) return '';
+            return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
         }
 
         function detectPriority(message) {
             const lower = message.toLowerCase();
 
-            if (
-                lower.includes('asap') ||
-                lower.includes('urgent') ||
-                lower.includes('immediately') ||
-                lower.includes('right now')
-            ) {
+            if (/(asap|urgent|immediately|right now|emergency|critical|blocked|cannot continue|need now)/i.test(lower)) {
                 return { label: 'Urgent', className: 'urgent' };
             }
 
-            if (
-                lower.includes('important') ||
-                lower.includes('deadline') ||
-                lower.includes('today') ||
-                lower.includes('priority')
-            ) {
+            if (/(important|deadline|today|priority|before class|before demo|presentation|submit|review today)/i.test(lower)) {
                 return { label: 'Important', className: 'important' };
             }
 
@@ -1178,55 +1258,83 @@
 
         function detectClarityIssue(message) {
             const lower = message.toLowerCase();
-            const vagueWords = ['later', 'soon', 'maybe', 'something', 'somehow', 'idk', 'whenever', 'stuff'];
+            const issues = [];
 
-            for (const word of vagueWords) {
-                if (lower.includes(word)) {
-                    return `Possible unclear wording detected because of "${word}". Try being more specific.`;
+            const vagueWords = [
+                'later', 'soon', 'maybe', 'something', 'somehow',
+                'idk', 'whenever', 'stuff', 'that thing', 'this thing'
+            ];
+
+            vagueWords.forEach(word => {
+                const pattern = new RegExp(`\\b${word.replace(/\s+/g, '\\s+')}\\b`, 'i');
+                if (pattern.test(lower)) issues.push(`"${word}" may be too vague`);
+            });
+
+            if (lower.length < 8) issues.push('message is too short');
+
+            if (/(do it|fix it|send it|check it|make it)/i.test(lower)) {
+                issues.push('task or file is not clearly specified');
+            }
+
+            if (!/(today|tomorrow|at|by|before|after|\d|am|pm|morning|evening|deadline)/i.test(lower) &&
+                /(urgent|asap|soon|later|deadline|send|review|fix|submit)/i.test(lower)) {
+                issues.push('time or deadline is missing');
+            }
+
+            if (issues.length === 0) return '';
+            return `Possible clarity issue: ${issues.slice(0, 2).join('; ')}. Consider adding the exact task, file, or deadline.`;
+        }
+
+        function hasInformalLanguage(message) {
+            return /(bro|dude|lol|lmao|haha|pls|plz|thx|ty|idk|gonna|wanna|gotta|asap|\bu\b|\bur\b|cuz|brb|omg|tbh|nvm)/i.test(message);
+        }
+
+        function chooseTemplate(cleaned, priority) {
+            const lower = cleaned.toLowerCase();
+
+            for (const rule of rewriteRules) {
+                if (rule.patterns.some(pattern => pattern.test(lower))) {
+                    return rule.rewrite(cleaned);
                 }
             }
 
-            if (lower.length > 0 && !/[0-9]/.test(lower) && (lower.includes('do it') || lower.includes('send it'))) {
-                return 'This instruction may be unclear. Consider adding a time, file name, or exact task.';
+            if (/please|could you|would you|kindly|it would be helpful/i.test(cleaned)) {
+                return ensurePunctuation(sentenceCase(cleaned));
             }
 
-            return '';
+            if (priority.label === 'Urgent') {
+                return `This is urgent. Could you please ${cleaned}?`;
+            }
+
+            const styles = [
+                msg => `Could you please ${msg}`,
+                msg => `Please ${msg}`,
+                msg => `Would you be able to ${msg}`,
+                msg => `It would be helpful if you could ${msg}`
+            ];
+
+            const selected = styles[Math.abs(cleaned.length) % styles.length];
+            return selected(cleaned);
         }
 
         function rewriteProfessionally(message) {
-            let rewritten = `Could you please ${message.trim()}`;
+            const original = normalizeMessage(message);
+            const cleaned = cleanForRewrite(original);
+            if (!cleaned) return '';
 
-            const replacements = [
-                { from: /\b(send me\b)/gi, to: 'send' },
-                { from: /\bbro\b/gi, to: '' },
-                { from: /\bdude\b/gi, to: '' },
-                { from: /\bok\b/gi, to: 'alright' },
-                { from: /\bnow\b/gi, to: 'as soon as possible' },
-                { from: /\bu\b/gi, to: 'you' },
-                { from: /\bpls\b/gi, to: 'please' },
-                { from: /\bthx\b/gi, to: 'thank you' }
-            ];
+            const priority = detectPriority(original);
+            let rewritten = chooseTemplate(cleaned, priority);
 
-            rewritten = message.trim();
-            replacements.forEach(rule => {
-                rewritten = rewritten.replace(rule.from, rule.to);
-            });
+            rewritten = rewritten
+                .replace(/\bplease please\b/gi, 'please')
+                .replace(/\byou you\b/gi, 'you')
+                .replace(/\s+/g, ' ')
+                .trim();
 
-            rewritten = normalizeMessage(rewritten);
+            rewritten = sentenceCase(rewritten);
+            rewritten = ensurePunctuation(rewritten);
 
-            if (!rewritten) return '';
-
-            if (!/^could you please/i.test(rewritten) && !/^please/i.test(rewritten)) {
-                rewritten = `Could you please ${rewritten}`;
-            }
-
-            rewritten = rewritten.replace(/\s+,/g, ',').replace(/\s+\./g, '.');
-            rewritten = rewritten.charAt(0).toUpperCase() + rewritten.slice(1);
-
-            if (!/[.!?]$/.test(rewritten)) {
-                rewritten += '.';
-            }
-
+            if (rewritten.toLowerCase() === original.toLowerCase()) return '';
             return rewritten;
         }
 
@@ -1237,8 +1345,12 @@
                 assistPanelEl.classList.remove('show');
                 clarityValueEl.textContent = 'No clarity issue detected.';
                 clarityValueEl.className = 'assist-value muted';
+                clarityValueEl.style.borderLeft = 'none';
+                clarityValueEl.style.paddingLeft = '0';
                 rewriteValueEl.textContent = 'No rewrite suggestion yet.';
                 rewriteValueEl.className = 'assist-value muted';
+                rewriteValueEl.style.borderLeft = 'none';
+                rewriteValueEl.style.paddingLeft = '0';
                 priorityPillEl.textContent = 'Normal';
                 priorityPillEl.className = 'priority-pill normal';
                 currentSuggestion = '';
@@ -1255,19 +1367,34 @@
             if (clarityIssue) {
                 clarityValueEl.textContent = clarityIssue;
                 clarityValueEl.className = 'assist-value';
+                clarityValueEl.style.borderLeft = '3px solid #f59e0b';
+                clarityValueEl.style.paddingLeft = '10px';
             } else {
                 clarityValueEl.textContent = 'No clarity issue detected.';
                 clarityValueEl.className = 'assist-value muted';
+                clarityValueEl.style.borderLeft = 'none';
+                clarityValueEl.style.paddingLeft = '0';
             }
 
             const rewritten = rewriteProfessionally(text);
-            if (rewritten && rewritten !== text) {
+            if (rewritten) {
                 rewriteValueEl.textContent = rewritten;
                 rewriteValueEl.className = 'assist-value';
+                rewriteValueEl.style.borderLeft = '3px solid #22c55e';
+                rewriteValueEl.style.paddingLeft = '10px';
                 currentSuggestion = rewritten;
+            } else if (hasInformalLanguage(text)) {
+                const cleaned = ensurePunctuation(sentenceCase(cleanForRewrite(text)));
+                rewriteValueEl.textContent = cleaned;
+                rewriteValueEl.className = 'assist-value';
+                rewriteValueEl.style.borderLeft = '3px solid #22c55e';
+                rewriteValueEl.style.paddingLeft = '10px';
+                currentSuggestion = cleaned;
             } else {
                 rewriteValueEl.textContent = 'Your message already looks professional.';
                 rewriteValueEl.className = 'assist-value muted';
+                rewriteValueEl.style.borderLeft = 'none';
+                rewriteValueEl.style.paddingLeft = '0';
                 currentSuggestion = '';
             }
         }
@@ -1319,7 +1446,10 @@
 
         function renderConversation() {
             const chat = chats.find(c => c.id === currentChatId);
-            if (!chat) return;
+            if (!chat) {
+                messagesEl.innerHTML = `<div class="empty-state">Select a chat to start messaging.</div>`;
+                return;
+            }
 
             document.getElementById('conversationName').textContent = chat.name;
             document.getElementById('conversationStatus').textContent = chat.status;
@@ -1356,18 +1486,12 @@
             const priority = detectPriority(text);
 
             let finalText = text;
-            if (priority.label !== 'Normal') {
-                finalText = `[${priority.label}] ${text}`;
-            }
+            if (priority.label !== 'Normal') finalText = `[${priority.label}] ${text}`;
 
-            chat.messages.push({
-                sender: 'you',
-                text: finalText,
-                time
-            });
-
+            chat.messages.push({ sender: 'you', text: finalText, time });
             chat.preview = finalText;
             chat.time = 'Now';
+            chat.unread = 0;
 
             messageInputEl.value = '';
             currentSuggestion = '';
@@ -1394,7 +1518,6 @@
         });
 
         chatSearchEl.addEventListener('input', renderChatList);
-
         messageInputEl.addEventListener('input', updateComposerAssist);
 
         messageInputEl.addEventListener('keydown', (e) => {
