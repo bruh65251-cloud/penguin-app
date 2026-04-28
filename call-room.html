@@ -297,17 +297,11 @@
 
 
         .subtitle-heard {
-            font-size: 12px;
-            color: rgba(255,255,255,0.65);
-            line-height: 1.45;
-            margin-bottom: 6px;
+            display: none;
         }
 
         .subtitle-matched {
-            font-size: 12px;
-            color: #fde68a;
-            line-height: 1.45;
-            margin-bottom: 6px;
+            display: none;
         }
 
         .subtitle-translated {
@@ -722,8 +716,8 @@
 
                 <div class="live-subtitle" id="liveSubtitle">
                     <div class="subtitle-label">Live Translation</div>
-                    <div class="subtitle-heard" id="subtitleHeard">Heard: waiting for speech...</div>
-                    <div class="subtitle-matched" id="subtitleMatched">Matched: waiting for phrase...</div>
+                    <div class="subtitle-heard" id="subtitleHeard"></div>
+                    <div class="subtitle-matched" id="subtitleMatched"></div>
                     <div class="subtitle-translated only-translation" id="subtitleTranslated">Translation will appear here</div>
                 </div>
 
@@ -836,7 +830,7 @@
                         <div class="feature-pill" id="gesturePill">Gesture Off</div>
                     </div>
                     <div class="assist-note">
-                        Turn on Translate to show what the browser heard, then map it to the nearest controlled demo phrase. This prevents random raw speech from being translated incorrectly and improves demo stability for accents.
+                        Turn on Translate to show only the clean language translation on screen. The system still maps speech to the nearest controlled demo phrase for stable accent-friendly presentation.
                     </div>
                 </div>
 
@@ -1494,8 +1488,8 @@ ZH: ${getChineseText(phrase)}`;
 
             if (!translated && !heard) {
                 subtitle.classList.remove('active');
-                heardEl.textContent = 'Heard: waiting for speech...';
-                matchedEl.textContent = 'Matched: waiting for phrase...';
+                heardEl.textContent = '';
+                matchedEl.textContent = '';
                 translatedEl.textContent = 'Translation will appear here';
                 return;
             }
@@ -1508,7 +1502,7 @@ ZH: ${getChineseText(phrase)}`;
                 if (currentKey === lastSubtitleOutput) return;
                 lastSubtitleOutput = currentKey;
                 translatedEl.textContent = translated;
-                document.getElementById('translatedSpeech').textContent = `${heard ? `Heard: ${heard}\n` : ''}${matched ? `Matched: ${matched}\n` : ''}${translated}`;
+                document.getElementById('translatedSpeech').textContent = translated;
             }
         }
 
@@ -1586,7 +1580,7 @@ ZH: ${getChineseText(phrase)}`;
                     if (result.isFinal) {
                         const retryText = 'Please repeat slowly. The phrase is outside the demo phrase bank.';
                         updateSubtitle(retryText, transcript, 'No safe match');
-                        document.getElementById('translatedSpeech').textContent = `Heard: ${transcript}\nMatched: No safe match\n${retryText}`;
+                        document.getElementById('translatedSpeech').textContent = retryText;
                     }
                     return;
                 }
@@ -1601,7 +1595,7 @@ ZH: ${getChineseText(phrase)}`;
                 if (result.isFinal) {
                     sendAssistPayload({
                         type: 'subtitle',
-                        translated: `${transcript ? `Heard: ${transcript}\n` : ''}Matched: ${matchedLabel}\n${translated}`
+                        translated: translated
                     });
                 }
             };
